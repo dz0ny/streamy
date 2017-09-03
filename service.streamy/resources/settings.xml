@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+   <category label="General">
+      <setting type="lsep" />
+      <setting label="Listen address" type="text" id="tx_adr" default="0.0.0.0:9092" />
+      <setting label="Cache" type="folder" option="writeable" id="tx_cache" default="/storage/.kodi/userdata/addon_data/service.streamy/cache" />
+   </category>
+</settings>

@@ -1,0 +1,24 @@
+package: streamy
+import:
+- package: github.com/anacrolix/dht
+- package: github.com/anacrolix/missinggo
+  subpackages:
+  - filecache
+  - httptoo
+  - refclose
+  - x
+- package: github.com/anacrolix/tagflag
+- package: github.com/anacrolix/torrent
+  subpackages:
+  - iplist
+  - metainfo
+  - storage
+- package: github.com/gorilla/mux
+  version: ^1.4.0
+- package: github.com/json-iterator/go
+  version: ^1.0.0
+- package: github.com/justinas/alice
+  version: ^1.0.0
+- package: golang.org/x/net
+  subpackages:
+  - websocket
