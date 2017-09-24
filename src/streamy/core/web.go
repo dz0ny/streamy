@@ -9,15 +9,11 @@ import (
 )
 
 type WebURLs struct {
-	HTML   string `json:"html"`
-	Play   string `json:"play"`
 	Events string `json:"ws_events"`
 }
 
 func NewWebURLs(hex string) WebURLs {
 	return WebURLs{
-		Play:   urlFor("play", hex),
-		HTML:   urlFor("html", hex),
 		Events: urlFor("events", hex),
 	}
 }
@@ -58,6 +54,5 @@ func NewTorrentWeb(t *torrent.Torrent) (tr TorrentWeb) {
 }
 
 func urlFor(name, ih string) string {
-	ret, _ := router.Get(name).URL("ih", ih)
-	return ret.String()
+	return fmt.Sprintf("/torrents/%s/%s", ih, name)
 }

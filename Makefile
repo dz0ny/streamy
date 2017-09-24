@@ -1,4 +1,4 @@
-VERSION := 0.0.1
+VERSION := 0.0.2
 APP_NAME := streamy
 COMMIT := $(shell git rev-parse HEAD)
 BUILD_TIME := $(shell date -u +%FT%T)

@@ -15,7 +15,6 @@ import (
 	"github.com/anacrolix/torrent/iplist"
 	"github.com/anacrolix/torrent/storage"
 	"github.com/jackpal/gateway"
-	"golang.org/x/time/rate"
 
 	"streamy/core"
 )
@@ -27,22 +26,22 @@ var buildTime = ""
 
 var flags = struct {
 	Addr          string        `help:"HTTP listen address"`
-	DHTPublicIP   net.IP        `help:"IP as it will appear to the DHT network"`
-	CacheCapacity tagflag.Bytes `help:"Data cache capacity (default 4GB)"`
-	TorrentGrace  time.Duration `help:"How long to wait to drop a torrent after its last request (default 10m)"`
+	CacheCapacity tagflag.Bytes `help:"Data cache capacity"`
+	TorrentGrace  time.Duration `help:"How long to wait to drop a torrent after its last request"`
 	FileDir       string        `help:"File-based storage directory, overrides piece storage"`
 	Seed          bool          `help:"Seed data"`
 	Debug         bool          `help:"Verbose output"`
-	UseNATPMP     bool          `help:"Use NATPMP"`
 }{
 	Addr:          "0.0.0.0:9092",
-	CacheCapacity: (10 << 30) * 4,
+	CacheCapacity: 10 << 29,
 	TorrentGrace:  time.Minute * 2,
-	UseNATPMP:     true,
 }
 
-func newTorrentClient() (ret *torrent.Client, err error) {
+func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error) {
 
+	if err != nil {
+		panic(err)
+	}
 	blocklist, err := iplist.MMapPacked("packed-blocklist")
 	if err != nil {
 		log.Print(err)
@@ -61,53 +60,61 @@ func newTorrentClient() (ret *torrent.Client, err error) {
 		IPBlocklist:    blocklist,
 		DefaultStorage: storage,
 		DHTConfig: dht.ServerConfig{
-			PublicIP:      flags.DHTPublicIP,
+			PublicIP:      ext,
 			StartingNodes: dht.GlobalBootstrapAddrs,
 		},
-		UploadRateLimiter: rate.NewLimiter(rate.Limit(1024*30), 10<<8),
-		Seed:              flags.Seed,
-		Debug:             flags.Debug,
-		DisableIPv6:       true,
-		ListenAddr:        ":53008",
+		Seed:        flags.Seed,
+		Debug:       flags.Debug,
+		DisableIPv6: true,
+		ListenAddr:  fmt.Sprintf(":%d", freePort),
 	})
+}
+
+func GetPort() int {
+	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	if err != nil {
+		panic(err)
+	}
+
+	l, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		panic(err)
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port
 }
 
 func main() {
 	log.SetFlags(log.Flags() | log.Lshortfile)
 	tagflag.Description(fmt.Sprintf("Streamy %s built at %s from commit %s@%s", version, buildTime, commitHash, branch))
 	tagflag.Parse(&flags)
-	cl, err := newTorrentClient()
+
+	freePort := GetPort()
+
+	var gatewayIP net.IP
+	var ext net.IP
+	log.Printf("Torrent client port: %d", freePort)
+	log.Printf("useNATPMP but gateway not provided, trying discovery")
+	gatewayIP, err := gateway.DiscoverGateway()
+	if err != nil {
+		return
+	}
+	log.Printf("...discovered gateway IP: %s", gatewayIP)
+	log.Println("Using NAT-PMP to open port.")
+	if gatewayIP != nil {
+		nat := core.NewNatPMP(gatewayIP)
+		nat.AddPortMapping("tcp", freePort, freePort, "Streamy port TCP", 360000)
+		nat.AddPortMapping("udp", freePort, freePort, "Streamy port TCP", 360000)
+		defer nat.DeletePortMapping("tcp", freePort, freePort)
+		defer nat.DeletePortMapping("udp", freePort, freePort)
+		ext, err = nat.GetExternalAddress()
+		log.Printf("...discovered external IP: %s", ext)
+	}
+
+	cl, err := newTorrentClient(freePort, ext)
 	if err != nil {
 		log.Fatalf("error creating torrent client: %s", err)
 	}
-
-	if nat, err := core.Discover(); err == nil {
-		nat.AddPortMapping("tcp", 53008, 53008, "Streamy port TCP", 360000)
-		nat.AddPortMapping("udp", 53008, 53008, "Streamy port TCP", 360000)
-		defer nat.DeletePortMapping("tcp", 53008, 53008)
-		defer nat.DeletePortMapping("udp", 53008, 53008)
-	} else {
-		var gatewayIP net.IP
-
-		log.Printf("useNATPMP but gateway not provided, trying discovery")
-		gatewayIP, err = gateway.DiscoverGateway()
-		if err != nil {
-			return
-		}
-		log.Printf("...discovered gateway IP: %s", gatewayIP)
-
-		log.Println("Using NAT-PMP to open port.")
-		if gatewayIP != nil {
-			nat := core.NewNatPMP(gatewayIP)
-			nat.AddPortMapping("tcp", 53008, 53008, "Streamy port TCP", 360000)
-			nat.AddPortMapping("udp", 53008, 53008, "Streamy port TCP", 360000)
-			defer nat.DeletePortMapping("tcp", 53008, 53008)
-			defer nat.DeletePortMapping("udp", 53008, 53008)
-
-		}
-
-	}
-
 	defer cl.Close()
 
 	l, err := net.Listen("tcp4", flags.Addr)
@@ -115,6 +122,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer l.Close()
+	log.Println(core.APIdocs())
 	log.Printf("serving http at %s", l.Addr())
 	h := &core.Handler{cl, flags.TorrentGrace}
 

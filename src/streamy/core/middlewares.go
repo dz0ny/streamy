@@ -1,7 +1,6 @@
 package core
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,24 +10,7 @@ import (
 	"github.com/anacrolix/missinggo/refclose"
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
-	"github.com/gorilla/mux"
 )
-
-const infohashQueryKey = "ih"
-
-func infohashFromQueryOrServeError(w http.ResponseWriter, q map[string]string) (ih metainfo.Hash, ok bool) {
-	qih, found := q[infohashQueryKey]
-	if !found {
-		http.Error(w, "Torrent not found", http.StatusNotFound)
-		return
-	}
-	if err := ih.FromHexString(qih); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	ok = true
-	return
-}
 
 // Handles ref counting, close grace, and various torrent client wrapping
 // work.
@@ -56,17 +38,6 @@ func getTorrentHandle(r *http.Request, ih metainfo.Hash) *torrent.Torrent {
 		go saveTorrentWhenGotInfo(t)
 	}
 	return t
-}
-
-func withTorrentContext(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ih, ok := infohashFromQueryOrServeError(w, mux.Vars(r))
-		if !ok {
-			return
-		}
-		t := getTorrentHandle(r, ih)
-		h.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), torrentContextKey, t)))
-	})
 }
 
 func saveTorrentWhenGotInfo(t *torrent.Torrent) {
