@@ -1,14 +1,14 @@
 hash: fbefe5744aa6e2f0b59ee81abc105b635a0b86c6622aee072f667ec8fcc223df
-updated: 2017-10-07T17:55:56.348093056+02:00
+updated: 2017-10-19T17:54:48.108406609+02:00
 imports:
 - name: github.com/anacrolix/dht
   version: 55080c51975fdff03dc82a2c3a76a0e2995a69d6
   subpackages:
   - krpc
 - name: github.com/anacrolix/go-libutp
-  version: 98f848b9a2e9936b06895a72862369b2804919fd
+  version: 2bf9f9a92044377b8d10b3c8d72c6d00e7ce436e
 - name: github.com/anacrolix/missinggo
-  version: b7a170825af6257e894d92cf99758f1343ee23ba
+  version: 1b975e2f93af0b40673a9f258e2cb8854bc7975c
   subpackages:
   - bitmap
   - filecache
@@ -29,7 +29,7 @@ imports:
 - name: github.com/anacrolix/tagflag
   version: b463dd74daec5c6980001acf63951e26284f92f4
 - name: github.com/anacrolix/torrent
-  version: 17ea4f7fdd2b73bc32e855d4670bbeacdda5c713
+  version: 2ab850f56e463c66ca78ebacba70c3aec907db0c
   subpackages:
   - bencode
   - iplist
@@ -48,7 +48,7 @@ imports:
 - name: github.com/bradfitz/iter
   version: 454541ec3da2a73fc34fd049b19ee5777bf19345
 - name: github.com/dustin/go-humanize
-  version: 79e699ccd02f240a1f1fbbdcee7e64c1c12e41aa
+  version: 77ed807830b4df581417e7f89eb81d4872832b72
 - name: github.com/edsrzf/mmap-go
   version: 0bce6a6887123b67a60366d2c9fe2dfb74289d2e
 - name: github.com/glycerine/go-unsnap-stream
@@ -74,7 +74,7 @@ imports:
 - name: github.com/jackpal/go-nat-pmp
   version: 28a68d0c24adce1da43f8df6a57340909ecd7fdd
 - name: github.com/json-iterator/go
-  version: 6ed27152e0428abfde127acb33b08b03a1e67cac
+  version: 6240e1e7983a85228f7fd9c3e1b6932d46ec58e2
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/mattn/go-sqlite3
@@ -84,7 +84,7 @@ imports:
 - name: github.com/philhofer/fwd
   version: bb6d471dc95d4fe11e432687f8b70ff496cf3136
 - name: github.com/RoaringBitmap/roaring
-  version: 68da788f3c71a75798eace07995f3077f5b68892
+  version: 6abdf50bd57bff92f338feb8dd9f9ea7ec3ec797
 - name: github.com/ryszard/goskiplist
   version: 2dfbae5fcf46374f166f8969cb07e167f1be6273
   subpackages:
@@ -92,7 +92,7 @@ imports:
 - name: github.com/spaolacci/murmur3
   version: 9f5d223c60793748f04a9d5b4b4eacddfc1f755d
 - name: github.com/tinylib/msgp
-  version: a011d4dea24f46fcd895ddefb67037dce9d41742
+  version: 3b556c64540842d4f82967be066a7f7fffc3adad
   subpackages:
   - msgp
 - name: github.com/willf/bitset

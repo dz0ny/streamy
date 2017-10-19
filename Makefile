@@ -1,4 +1,4 @@
-VERSION := 0.0.2
+VERSION := 0.0.4
 APP_NAME := streamy
 COMMIT := $(shell git rev-parse HEAD)
 BUILD_TIME := $(shell date -u +%FT%T)
@@ -53,6 +53,12 @@ build:
 	env GOOS=linux GOARCH=arm go build --ldflags '-w -X main.version=$(VERSION) -X main.commitHash=${COMMIT} -X main.branch=${BRANCH} -X main.buildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-armv7l $(APP_NAME)/cmd/$(APP_NAME)
 	env GOOS=linux GOARCH=arm64 go build --ldflags '-w -X main.version=$(VERSION) -X main.commitHash=${COMMIT} -X main.branch=${BRANCH} -X main.buildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-aarch64 $(APP_NAME)/cmd/$(APP_NAME)
 	env GOOS=linux GOARCH=amd64 go build --ldflags '-s -w -X main.version=$(VERSION) -X main.commitHash=${COMMIT} -X main.branch=${BRANCH} -X main.buildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-x86_64 $(APP_NAME)/cmd/$(APP_NAME)
+
+package: build
+	mv -f $(APP_NAME)-Linux-armv7l service.streamy/bin/
+	mv -f $(APP_NAME)-Linux-aarch64 service.streamy/bin/
+	mv -f $(APP_NAME)-Linux-x86_64 service.streamy/bin/
+	cd service.streamy; zip -r ../service.$(APP_NAME)-${COMMIT}.zip .
 
 install:
 	sudo mv $(APP_NAME)-`uname -s`-`uname -m` /usr/local/bin/$(APP_NAME)
