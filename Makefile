@@ -63,6 +63,10 @@ package: build
 install:
 	sudo mv $(APP_NAME)-`uname -s`-`uname -m` /usr/local/bin/$(APP_NAME)
 
+docs:
+	npm install api-console-cli
+	node_modules/.bin/api-console build api.raml
+
 upload:
 	bin/github-release upload \
 		--user dz0ny \

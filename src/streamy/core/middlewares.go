@@ -35,20 +35,8 @@ func getTorrentHandle(r *http.Request, ih metainfo.Hash) *torrent.Torrent {
 			t.AddTrackers(mi.UpvertedAnnounceList())
 			t.SetInfoBytes(mi.InfoBytes)
 		}
-		go saveTorrentWhenGotInfo(t)
 	}
 	return t
-}
-
-func saveTorrentWhenGotInfo(t *torrent.Torrent) {
-	select {
-	case <-t.Closed():
-	case <-t.GotInfo():
-	}
-	err := saveTorrentFile(t)
-	if err != nil {
-		log.Printf("error saving torrent file: %s", err)
-	}
 }
 
 func cachedMetaInfo(infoHash metainfo.Hash) *metainfo.MetaInfo {

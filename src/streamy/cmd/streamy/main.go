@@ -37,10 +37,10 @@ var flags = struct {
 }{
 	Addr:          "0.0.0.0:9092",
 	CacheCapacity: 1 << 31,
-	TorrentGrace:  time.Minute * 10,
+	TorrentGrace:  time.Minute * 1,
 	FileDir:       "filecache",
-	UploadRate:    10240,
-	DownloadRate:  614400,
+	UploadRate:    25600,
+	DownloadRate:  1048576,
 }
 
 func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error) {
