@@ -3,6 +3,6 @@ package core
 import "expvar"
 
 var (
-	eventHandlerWebsocketReadClosed = expvar.NewInt("confluenceEventHandlerWebsocketReadClosed")
-	eventHandlerContextDone         = expvar.NewInt("confluenceEventHandlerContextDone")
+	eventHandlerWebsocketReadClosed = expvar.NewInt("EventHandlerWebsocketReadClosed")
+	eventHandlerContextDone         = expvar.NewInt("EventHandlerContextDone")
 )

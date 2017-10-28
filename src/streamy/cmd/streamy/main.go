@@ -15,6 +15,7 @@ import (
 	"github.com/anacrolix/torrent/iplist"
 	"github.com/anacrolix/torrent/storage"
 	"github.com/jackpal/gateway"
+	"golang.org/x/time/rate"
 
 	"streamy/core"
 )
@@ -28,13 +29,18 @@ var flags = struct {
 	Addr          string        `help:"HTTP listen address"`
 	CacheCapacity tagflag.Bytes `help:"Data cache capacity"`
 	TorrentGrace  time.Duration `help:"How long to wait to drop a torrent after its last request"`
-	FileDir       string        `help:"File-based storage directory, overrides piece storage"`
+	FileDir       string        `help:"Piece storage path"`
 	Seed          bool          `help:"Seed data"`
+	UploadRate    tagflag.Bytes `help:"Upload rate limit"`
+	DownloadRate  tagflag.Bytes `help:"Download rate limit"`
 	Debug         bool          `help:"Verbose output"`
 }{
 	Addr:          "0.0.0.0:9092",
-	CacheCapacity: 10 << 29,
-	TorrentGrace:  time.Minute * 2,
+	CacheCapacity: 1 << 31,
+	TorrentGrace:  time.Minute * 10,
+	FileDir:       "filecache",
+	UploadRate:    10240,
+	DownloadRate:  614400,
 }
 
 func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error) {
@@ -47,10 +53,7 @@ func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error)
 		log.Print(err)
 	}
 	storage := func() storage.ClientImpl {
-		if flags.FileDir != "" {
-			return storage.NewFile(flags.FileDir)
-		}
-		fc, err := filecache.NewCache("filecache")
+		fc, err := filecache.NewCache(flags.FileDir)
 		x.Pie(err)
 		fc.SetCapacity(flags.CacheCapacity.Int64())
 		storageProvider := fc.AsResourceProvider()
@@ -63,10 +66,13 @@ func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error)
 			PublicIP:      ext,
 			StartingNodes: dht.GlobalBootstrapAddrs,
 		},
-		Seed:        flags.Seed,
-		Debug:       flags.Debug,
-		DisableIPv6: true,
-		ListenAddr:  fmt.Sprintf(":%d", freePort),
+		Seed:                flags.Seed,
+		Debug:               flags.Debug,
+		DisableIPv6:         true,
+		UploadRateLimiter:   rate.NewLimiter(rate.Limit(flags.UploadRate), 256<<10),
+		DownloadRateLimiter: rate.NewLimiter(rate.Limit(flags.DownloadRate), 1<<20),
+
+		ListenAddr: fmt.Sprintf(":%d", freePort),
 	})
 }
 

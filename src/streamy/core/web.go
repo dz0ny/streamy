@@ -20,8 +20,8 @@ func NewWebURLs(hex string) WebURLs {
 
 type fileInfo struct {
 	metainfo.FileInfo
-	InfoUrl   string `json:"info"`
-	StreamUrl string `json:"data"`
+	InfoURL   string `json:"info"`
+	StreamURL string `json:"data"`
 }
 
 type TorrentWeb struct {
