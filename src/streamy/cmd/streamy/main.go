@@ -66,17 +66,23 @@ func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error)
 			PublicIP:      ext,
 			StartingNodes: dht.GlobalBootstrapAddrs,
 		},
-		Seed:                flags.Seed,
-		Debug:               flags.Debug,
-		DisableIPv6:         true,
-		UploadRateLimiter:   rate.NewLimiter(rate.Limit(flags.UploadRate), 256<<10),
-		DownloadRateLimiter: rate.NewLimiter(rate.Limit(flags.DownloadRate), 1<<20),
+		DisableAggressiveUpload: !flags.Seed,
+		Debug:                          flags.Debug,
+		DisableIPv6:                    true,
+		UploadRateLimiter:              rate.NewLimiter(rate.Limit(flags.UploadRate), 256<<10),
+		DownloadRateLimiter:            rate.NewLimiter(rate.Limit(flags.DownloadRate), 1<<20),
+		EstablishedConnsPerTorrent:     20, // default 80
+		HalfOpenConnsPerTorrent:        20, // default  80
+		TorrentPeersHighWater:          50, // default 200
+		TorrentPeersLowWater:           10, // default 50
+		ExtendedHandshakeClientVersion: "Transmission/2.92",
+		Bep20: "-TR2920-",
 
 		ListenAddr: fmt.Sprintf(":%d", freePort),
 	})
 }
 
-func GetPort() int {
+func getPort() int {
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {
 		panic(err)
@@ -95,7 +101,7 @@ func main() {
 	tagflag.Description(fmt.Sprintf("Streamy %s built at %s from commit %s@%s", version, buildTime, commitHash, branch))
 	tagflag.Parse(&flags)
 
-	freePort := GetPort()
+	freePort := getPort()
 
 	var gatewayIP net.IP
 	var ext net.IP
@@ -130,7 +136,10 @@ func main() {
 	defer l.Close()
 	log.Println(core.APIdocs())
 	log.Printf("serving http at %s", l.Addr())
-	h := &core.Handler{cl, flags.TorrentGrace}
+	h := &core.Handler{
+		TC:                cl,
+		TorrentCloseGrace: flags.TorrentGrace,
+	}
 
 	err = http.Serve(l, h)
 	if err != nil {

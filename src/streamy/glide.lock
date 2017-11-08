@@ -1,14 +1,14 @@
 hash: fbefe5744aa6e2f0b59ee81abc105b635a0b86c6622aee072f667ec8fcc223df
-updated: 2017-10-28T12:37:08.774301781+02:00
+updated: 2017-11-08T17:15:35.834180043+01:00
 imports:
 - name: github.com/anacrolix/dht
   version: 55080c51975fdff03dc82a2c3a76a0e2995a69d6
   subpackages:
   - krpc
 - name: github.com/anacrolix/go-libutp
-  version: 5d8e7352f7f0a61d68e854601328faf08d7c18d0
+  version: ab1d4f3b9abbf1bc88c1c2cce6defa7926b652cb
 - name: github.com/anacrolix/missinggo
-  version: 1b975e2f93af0b40673a9f258e2cb8854bc7975c
+  version: 081ada5bb4413ac4f42cf047a8ee485b228778a0
   subpackages:
   - bitmap
   - filecache
@@ -25,11 +25,11 @@ imports:
   - slices
   - x
 - name: github.com/anacrolix/sync
-  version: d29d95568d362a0008c1ffbaea39a3449ea67509
+  version: eee974e4f8c1e1f38d16e32713dd408d6b02ca55
 - name: github.com/anacrolix/tagflag
   version: b463dd74daec5c6980001acf63951e26284f92f4
 - name: github.com/anacrolix/torrent
-  version: 911423307d2ae0ffa555b323fb7414b7f427e915
+  version: 74c5d425fbecc45e24bf62a3ca3ee935d36b67b4
   subpackages:
   - bencode
   - iplist
@@ -48,7 +48,7 @@ imports:
 - name: github.com/bradfitz/iter
   version: 454541ec3da2a73fc34fd049b19ee5777bf19345
 - name: github.com/dustin/go-humanize
-  version: 77ed807830b4df581417e7f89eb81d4872832b72
+  version: 6d15c0ae71e55ed645c21ac4945aaadbc0e9a590
 - name: github.com/edsrzf/mmap-go
   version: 0bce6a6887123b67a60366d2c9fe2dfb74289d2e
 - name: github.com/glycerine/go-unsnap-stream
@@ -66,7 +66,7 @@ imports:
 - name: github.com/google/btree
   version: 316fb6d3f031ae8f4d457c6c5186b9e3ded70435
 - name: github.com/gorilla/mux
-  version: 24fca303ac6da784b9e8269f724ddeb0b2eea5e7
+  version: 7f08801859139f86dfafd1c296e2cba9a80d292e
 - name: github.com/huandu/xstrings
   version: d6590c0c31d16526217fa60fbd2067f7afcd78c5
 - name: github.com/jackpal/gateway
@@ -84,7 +84,7 @@ imports:
 - name: github.com/philhofer/fwd
   version: bb6d471dc95d4fe11e432687f8b70ff496cf3136
 - name: github.com/RoaringBitmap/roaring
-  version: 81a3055cff41feaca59e4f11e4055b20c45e2652
+  version: 5930de397dc5823f13e026b6094668c2dd526530
 - name: github.com/ryszard/goskiplist
   version: 2dfbae5fcf46374f166f8969cb07e167f1be6273
   subpackages:
