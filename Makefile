@@ -1,4 +1,4 @@
-VERSION := 0.0.7
+VERSION := 0.0.8
 APP_NAME := streamy
 COMMIT := $(shell git rev-parse HEAD)
 BUILD_TIME := $(shell date -u +%FT%T)
@@ -58,7 +58,7 @@ package: build
 	mv -f $(APP_NAME)-Linux-armv7l service.streamy/bin/
 	mv -f $(APP_NAME)-Linux-aarch64 service.streamy/bin/
 	mv -f $(APP_NAME)-Linux-x86_64 service.streamy/bin/
-	zip -r service.$(APP_NAME)-${VERSION}-${COMMIT}.zip service.$(APP_NAME)
+	zip -r service.$(APP_NAME)-${VERSION}-${BUILD_TIME}.zip service.$(APP_NAME)
 
 install:
 	sudo mv $(APP_NAME)-`uname -s`-`uname -m` /usr/local/bin/$(APP_NAME)
@@ -67,12 +67,12 @@ docs:
 	npm install api-console-cli
 	node_modules/.bin/api-console build api.raml
 
-upload:
-	bin/github-release upload \
+release: package
+	github-release upload \
 		--user dz0ny \
 		--repo video.streamy \
 		--tag "v$(VERSION)" \
-		--name "service.$(APP_NAME)-${VERSION}-${COMMIT}.zip" \
-		--file "service.$(APP_NAME)-${VERSION}-${COMMIT}.zip"
+		--name "service.$(APP_NAME)-${VERSION}-${BUILD_TIME}.zip" \
+		--file "service.$(APP_NAME)-${VERSION}-${BUILD_TIME}.zip"
 
 all: deps sync build test

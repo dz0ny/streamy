@@ -134,7 +134,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer l.Close()
-	log.Println(core.APIdocs())
+
 	log.Printf("serving http at %s", l.Addr())
 	h := &core.Handler{
 		TC:                cl,

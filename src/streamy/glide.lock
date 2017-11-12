@@ -1,5 +1,5 @@
 hash: fbefe5744aa6e2f0b59ee81abc105b635a0b86c6622aee072f667ec8fcc223df
-updated: 2017-11-08T17:15:35.834180043+01:00
+updated: 2017-11-26T15:41:56.658485703+01:00
 imports:
 - name: github.com/anacrolix/dht
   version: 55080c51975fdff03dc82a2c3a76a0e2995a69d6
@@ -29,7 +29,7 @@ imports:
 - name: github.com/anacrolix/tagflag
   version: b463dd74daec5c6980001acf63951e26284f92f4
 - name: github.com/anacrolix/torrent
-  version: 74c5d425fbecc45e24bf62a3ca3ee935d36b67b4
+  version: eed0743d4ef79ea86c263b2d7b56005ab91b5fc5
   subpackages:
   - bencode
   - iplist
@@ -44,11 +44,11 @@ imports:
 - name: github.com/anacrolix/utp
   version: 87ba7933b8d7520e5e6e27460e25e42c2fccab9f
 - name: github.com/boltdb/bolt
-  version: fa5367d20c994db73282594be0146ab221657943
+  version: 9da31745363232bc1e27dbab3569e77383a51585
 - name: github.com/bradfitz/iter
   version: 454541ec3da2a73fc34fd049b19ee5777bf19345
 - name: github.com/dustin/go-humanize
-  version: 6d15c0ae71e55ed645c21ac4945aaadbc0e9a590
+  version: bb3d318650d48840a39aa21a027c6630e198e626
 - name: github.com/edsrzf/mmap-go
   version: 0bce6a6887123b67a60366d2c9fe2dfb74289d2e
 - name: github.com/glycerine/go-unsnap-stream
@@ -74,11 +74,11 @@ imports:
 - name: github.com/jackpal/go-nat-pmp
   version: 28a68d0c24adce1da43f8df6a57340909ecd7fdd
 - name: github.com/json-iterator/go
-  version: 6240e1e7983a85228f7fd9c3e1b6932d46ec58e2
+  version: f7279a603edee96fe7764d3de9c6ff8cf9970994
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/mattn/go-sqlite3
-  version: 615c193e01d8d462eef7ee390171506f531a1c9a
+  version: d5ffb5c0cca8778699a929b236766f4a7af674e8
 - name: github.com/mschoch/smat
   version: 90eadee771aeab36e8bf796039b8c261bebebe4f
 - name: github.com/philhofer/fwd
@@ -100,7 +100,7 @@ imports:
 - name: github.com/willf/bloom
   version: 54e3b963ee1652b06c4562cb9b6020ebc6e36e59
 - name: golang.org/x/net
-  version: 8351a756f30f1297fe94bbf4b767ec589c6ea6d0
+  version: f315505cf3349909cdf013ea56690da34e96a451
   subpackages:
   - context
   - websocket

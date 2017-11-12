@@ -42,7 +42,7 @@ func init() {
 	})
 
 	// Static router
-	fileServerHandler(router, "/static", http.Dir("static"))
+	fileServerHandler(router)
 }
 
 func APIdocs() string {

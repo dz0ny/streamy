@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	"github.com/rakyll/statik/fs"
 
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
@@ -198,20 +198,19 @@ func corsHandler(h http.Handler) http.Handler {
 	})
 }
 
-func fileServerHandler(r chi.Router, path string, root http.FileSystem) {
-	if strings.ContainsAny(path, ":*") {
-		panic("Server does not permit URL parameters.")
+func fileServerHandler(r chi.Router) {
+	statikFS, err := fs.New()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	fs := http.StripPrefix(path, http.FileServer(root))
-
-	if path != "/" && path[len(path)-1] != '/' {
-		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
-		path += "/"
-	}
-	path += "*"
-
-	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fs.ServeHTTP(w, r)
-	}))
+	staticHandler := http.FileServer(statikFS)
+	// Serves up the index.html file regardless of the path.
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = "/"
+		staticHandler.ServeHTTP(w, r)
+	})
+	r.Get("/static/", func(w http.ResponseWriter, r *http.Request) {
+		staticHandler.ServeHTTP(w, r)
+	})
 }

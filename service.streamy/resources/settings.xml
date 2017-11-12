@@ -4,6 +4,7 @@
       <setting type="lsep" />
       <setting label="Listen address" type="text" id="tx_adr" default="0.0.0.0:9092" />
       <setting label="Cache" type="folder" option="writeable" id="tx_cache" default="/storage/.kodi/userdata/addon_data/service.streamy/cache" />
+      <setting label="Cache capacity" id="cache_capacity" type="string" default="4G" />
       <setting label="Max. upload rate in B/s" id="max_up_rate" type="number" default="25600" />
       <setting label="Max. download rate in B/s" id="max_do_rate" type="number" default="1048576" />
    </category>
