@@ -6,13 +6,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/anacrolix/missinggo"
 	"github.com/anacrolix/missinggo/httptoo"
 	"github.com/anacrolix/torrent"
-	"github.com/anacrolix/torrent/metainfo"
 )
 
 // Path is the given request path.
@@ -45,42 +43,10 @@ func saveTorrentFile(t *torrent.Torrent) (err error) {
 	return os.Rename(ps, p)
 }
 
-func listTorrents() ([]TorrentWeb, error) {
+func listTorrents(c *torrent.Client) ([]TorrentWeb, error) {
 	var torrents []TorrentWeb
-	walkFn := func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && strings.HasSuffix(info.Name(), ".torrent") {
-			mi, err := metainfo.LoadFromFile(path)
-			if err != nil {
-				return err
-			}
-			t, err := mi.UnmarshalInfo()
-			hex := mi.HashInfoBytes().HexString()
-			var files []fileInfo
-			for _, f := range t.Files {
-				path_ := strings.Join(f.Path, "/")
-				pi := fmt.Sprintf("?path=%s", path_)
-				fi := fileInfo{f, urlFor("file", hex) + pi, urlFor("stream", hex) + pi}
-				files = append(files, fi)
-			}
-			tr := TorrentWeb{
-				Name:     t.Name,
-				InfoHash: hex,
-				Files:    files,
-				URLs:     NewWebURLs(hex),
-			}
-			torrents = append(torrents, tr)
-		}
-		return nil
-	}
-	if _, err := os.Stat("torrents"); os.IsNotExist(err) {
-		return torrents, nil
-	}
-	err := filepath.Walk("torrents", walkFn)
-	if err != nil {
-		return torrents, err
+	for _, t := range c.Torrents() {
+		torrents = append(torrents, NewTorrentWeb(t))
 	}
 	return torrents, nil
 }

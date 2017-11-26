@@ -31,6 +31,10 @@ type TorrentWeb struct {
 	Files []fileInfo           `json:"files"`
 	Stats torrent.TorrentStats `json:"stats"`
 	URLs  WebURLs              `json:"urls"`
+
+	Downloaded int64
+	Missing    int64
+	Seeding    bool
 }
 
 func NewTorrentWeb(t *torrent.Torrent) (tr TorrentWeb) {
@@ -44,11 +48,14 @@ func NewTorrentWeb(t *torrent.Torrent) (tr TorrentWeb) {
 		files = append(files, fi)
 	}
 	tr = TorrentWeb{
-		Name:     t.String(),
-		InfoHash: hex,
-		Files:    files,
-		Stats:    t.Stats(),
-		URLs:     NewWebURLs(hex),
+		Name:       t.String(),
+		InfoHash:   hex,
+		Files:      files,
+		Stats:      t.Stats(),
+		URLs:       NewWebURLs(hex),
+		Downloaded: t.BytesCompleted(),
+		Missing:    t.BytesMissing(),
+		Seeding:    t.Seeding(),
 	}
 	return
 }

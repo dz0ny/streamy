@@ -1,10 +1,7 @@
 package core
 
 import (
-	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/anacrolix/missinggo/refclose"
@@ -15,13 +12,21 @@ import (
 // Handles ref counting, close grace, and various torrent client wrapping
 // work.
 func getTorrentHandle(r *http.Request, ih metainfo.Hash) *torrent.Torrent {
+	tc := torrentClientForRequest(r)
+	t, _ := tc.AddTorrentInfoHash(ih)
+	return t
+}
+
+// Handles ref counting, close grace, and various torrent client wrapping
+// work.
+func getTorrentHandleCloser(r *http.Request, ih metainfo.Hash) *torrent.Torrent {
 	var ref *refclose.Ref
 	grace := torrentCloseGraceForRequest(r)
 	if grace >= 0 {
 		ref = torrentRefs.NewRef(ih)
 	}
 	tc := torrentClientForRequest(r)
-	t, new := tc.AddTorrentInfoHash(ih)
+	t, _ := tc.AddTorrentInfoHash(ih)
 	if grace >= 0 {
 		ref.SetCloser(t.Drop)
 		go func() {
@@ -29,24 +34,6 @@ func getTorrentHandle(r *http.Request, ih metainfo.Hash) *torrent.Torrent {
 			<-r.Context().Done()
 		}()
 	}
-	if new {
-		mi := cachedMetaInfo(ih)
-		if mi != nil {
-			t.AddTrackers(mi.UpvertedAnnounceList())
-			t.SetInfoBytes(mi.InfoBytes)
-		}
-	}
-	return t
-}
 
-func cachedMetaInfo(infoHash metainfo.Hash) *metainfo.MetaInfo {
-	p := fmt.Sprintf("torrents/%s.torrent", infoHash.HexString())
-	mi, err := metainfo.LoadFromFile(p)
-	if os.IsNotExist(err) {
-		return nil
-	}
-	if err != nil {
-		log.Printf("error loading metainfo file %q: %s", p, err)
-	}
-	return mi
+	return t
 }

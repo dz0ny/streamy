@@ -33,6 +33,4 @@ streamy-*-*
 torrents
 filecache
 node_modules
-web
-web-src
 *.zip

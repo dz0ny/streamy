@@ -1,0 +1,45 @@
+import * as axios from 'axios';
+
+const BASE = document.location.origin;
+//const BASE = "http://cubox:9092";
+
+
+function uploadTorrent(formData) {
+  const url = `${BASE}/torrents/add`;
+  return axios.post(url, formData).then(x => x.data)
+}
+
+function addMagnet(magnet) {
+  const url = `${BASE}/torrents/add?magnet=${encodeURIComponent(magnet)}`;
+  return axios.get(url).then(x => x.data)
+}
+
+function listTorrents() {
+  const url = `${BASE}/torrents`;
+  return axios.get(url).then(x => x.data)
+}
+
+function stopTorrent(ih) {
+  const url = `${BASE}/torrents/${ih}/stop`;
+  return axios.get(url).then(x => x.data)
+}
+
+function startTorrent(ih) {
+  const url = `${BASE}/torrents/${ih}/start`;
+  return axios.get(url).then(x => x.data)
+}
+
+function deleteTorrent(ih) {
+  const url = `${BASE}/torrents/${ih}`;
+  return axios.delete(url)
+}
+
+export {
+  uploadTorrent,
+  listTorrents,
+  startTorrent,
+  stopTorrent,
+  deleteTorrent,
+  addMagnet
+}
+

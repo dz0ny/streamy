@@ -1,7 +1,8 @@
 <settings>
     <setting id="tx_cache" value="/storage/.kodi/userdata/addon_data/service.streamy/cache" />
     <setting id="tx_addr" value="0.0.0.0:9092" />
-    <setting id="max_up_rate" value="25600" />
-    <setting id="max_do_rate" value="1048576" />
+    <setting id="max_up_rate" value="10k" />
+    <setting id="max_do_rate" value="1G" />
+    <setting id="cache_capacity" value="4G" />
 </settings>
 

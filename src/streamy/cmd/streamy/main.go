@@ -67,14 +67,14 @@ func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error)
 			StartingNodes: dht.GlobalBootstrapAddrs,
 		},
 		DisableAggressiveUpload: !flags.Seed,
-		Debug:                          flags.Debug,
-		DisableIPv6:                    true,
-		UploadRateLimiter:              rate.NewLimiter(rate.Limit(flags.UploadRate), 256<<10),
-		DownloadRateLimiter:            rate.NewLimiter(rate.Limit(flags.DownloadRate), 1<<20),
-		EstablishedConnsPerTorrent:     20, // default 80
-		HalfOpenConnsPerTorrent:        20, // default  80
-		TorrentPeersHighWater:          50, // default 200
-		TorrentPeersLowWater:           10, // default 50
+
+		Seed:  flags.Seed,
+		Debug: flags.Debug,
+
+		DisableIPv6:         true,
+		UploadRateLimiter:   rate.NewLimiter(rate.Limit(flags.UploadRate), 256<<10),
+		DownloadRateLimiter: rate.NewLimiter(rate.Limit(flags.DownloadRate), 1<<20),
+
 		ExtendedHandshakeClientVersion: "Transmission/2.92",
 		Bep20: "-TR2920-",
 

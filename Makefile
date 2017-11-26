@@ -49,6 +49,11 @@ editor:
 	go get -u -v github.com/newhook/go-symbols
 	go get -u -v golang.org/x/tools/cmd/guru
 
+ui:
+	cd web; npm run build
+	rm -rf src/streamy/statik
+	mv web/statik src/streamy
+	
 build:
 	env GOOS=linux GOARCH=arm go build --ldflags '-w -X main.version=$(VERSION) -X main.commitHash=${COMMIT} -X main.branch=${BRANCH} -X main.buildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-armv7l $(APP_NAME)/cmd/$(APP_NAME)
 	env GOOS=linux GOARCH=arm64 go build --ldflags '-w -X main.version=$(VERSION) -X main.commitHash=${COMMIT} -X main.branch=${BRANCH} -X main.buildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-aarch64 $(APP_NAME)/cmd/$(APP_NAME)

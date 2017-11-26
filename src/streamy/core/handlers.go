@@ -9,6 +9,8 @@ import (
 	"github.com/go-chi/render"
 	"github.com/rakyll/statik/fs"
 
+	_ "streamy/statik" // UI
+
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
 	"golang.org/x/net/websocket"
@@ -35,7 +37,8 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 // displayName: List torrents
 // description: Return list of torrents
 func statusHandler(w http.ResponseWriter, r *http.Request) {
-	torrents, err := listTorrents()
+	c := getTorrentClientFromRequestContext(r)
+	torrents, err := listTorrents(c)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("%s", err), http.StatusBadRequest)
 		return
@@ -57,13 +60,15 @@ func addMagnetHandler(w http.ResponseWriter, r *http.Request) {
 		if t, err := c.AddMagnet(uri); err == nil {
 			select {
 			case <-t.GotInfo():
-				err := saveTorrentFile(t)
-				if err != nil {
+				if err := saveTorrentFile(t); err != nil {
 					log.Printf("error saving torrent file: %s", err)
 				}
 				break
 			case <-r.Context().Done():
 				break
+			}
+			for _, f := range t.Files() {
+				f.PrioritizeRegion(0, f.Length()/100)
 			}
 			http.Redirect(w, r, fmt.Sprintf("/torrents/%s", t.InfoHash().HexString()), 301)
 		} else {
@@ -105,6 +110,9 @@ func addTorrentHandler(w http.ResponseWriter, r *http.Request) {
 				case <-r.Context().Done():
 					break
 				}
+				for _, f := range t.Files() {
+					f.PrioritizeRegion(0, f.Length()/100)
+				}
 				http.Redirect(w, r, fmt.Sprintf("/torrents/%s", t.InfoHash().HexString()), 301)
 			}
 		} else {
@@ -123,7 +131,49 @@ func infoTorrent(w http.ResponseWriter, r *http.Request) {
 	case <-r.Context().Done():
 		return
 	}
+
 	render.JSON(w, r, NewTorrentWeb(t))
+}
+
+// displayName: Torrent prefetch
+// description: Prefetch all torrent data
+func startTorrent(w http.ResponseWriter, r *http.Request) {
+	t := torrentForRequest(r)
+	select {
+	case <-t.GotInfo():
+		break
+	}
+
+	t.DownloadAll()
+	for _, f := range t.Files() {
+		f.PrioritizeRegion(0, (f.Length()/100)*10)
+	}
+	render.JSON(w, r, NewTorrentWeb(t))
+}
+
+// displayName: Torrent stop
+// description: Stop torrent download
+func stopTorrent(w http.ResponseWriter, r *http.Request) {
+	t := torrentForRequest(r)
+	select {
+	case <-t.GotInfo():
+		break
+	}
+	t.CancelPieces(0, t.NumPieces())
+	render.JSON(w, r, NewTorrentWeb(t))
+}
+
+// displayName: Torrent drop
+// description: Delete torrent
+func deleteTorrent(w http.ResponseWriter, r *http.Request) {
+	t := torrentForRequest(r)
+	select {
+	case <-t.GotInfo():
+	case <-r.Context().Done():
+		return
+	}
+	t.Drop()
+	render.PlainText(w, r, "OK")
 }
 
 // displayName: Torrent status
@@ -205,12 +255,18 @@ func fileServerHandler(r chi.Router) {
 	}
 
 	staticHandler := http.FileServer(statikFS)
-	// Serves up the index.html file regardless of the path.
+	path := "/static"
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		staticHandler.ServeHTTP(w, r)
+	}))
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path = "/"
-		staticHandler.ServeHTTP(w, r)
-	})
-	r.Get("/static/", func(w http.ResponseWriter, r *http.Request) {
 		staticHandler.ServeHTTP(w, r)
 	})
 }

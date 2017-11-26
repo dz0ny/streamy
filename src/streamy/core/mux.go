@@ -33,11 +33,13 @@ func init() {
 		})
 		r.Route("/{torrentHash}", func(r chi.Router) {
 			r.Use(torrentCtx)
-			//r.Delete("/", deleteTorrent)     // DELETE /torrents/123
+			r.Delete("/", deleteTorrent)     // DELETE /torrents/123
 			r.Get("/", infoTorrent)          // GET /torrents/123
 			r.Get("/events", eventHandler)   // GET /torrents/123/events
 			r.Get("/info", fileStateHandler) // GET /torrents/123/info
 			r.Get("/stream", dataHandler)    // GET /torrents/123/stream
+			r.Get("/start", startTorrent)    // GET /torrents/123/start
+			r.Get("/stop", stopTorrent)      // GET /torrents/123/stop
 		})
 	})
 
