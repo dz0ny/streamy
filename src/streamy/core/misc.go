@@ -67,7 +67,7 @@ func serveTorrent(w http.ResponseWriter, r *http.Request, t *torrent.Torrent) {
 func serveTorrentSection(w http.ResponseWriter, r *http.Request, t *torrent.Torrent, offset, length int64, name string) {
 	tr := t.NewReader()
 	defer tr.Close()
-	tr.SetReadahead(48 << 20)
+	tr.SetReadahead(100 << 20)
 	rs := missinggo.NewSectionReadSeeker(struct {
 		io.Reader
 		io.Seeker

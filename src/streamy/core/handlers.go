@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
@@ -57,6 +58,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 func addMagnetHandler(w http.ResponseWriter, r *http.Request) {
 	c := getTorrentClientFromRequestContext(r)
 	if uri := r.URL.Query().Get("magnet"); uri != "" {
+		uri, _ = url.QueryUnescape(uri)
 		if t, err := c.AddMagnet(uri); err == nil {
 			select {
 			case <-t.GotInfo():
@@ -68,7 +70,7 @@ func addMagnetHandler(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			for _, f := range t.Files() {
-				f.PrioritizeRegion(0, f.Length()/100)
+				f.PrioritizeRegion(0, (f.Length()/100)*10)
 			}
 			http.Redirect(w, r, fmt.Sprintf("/torrents/%s", t.InfoHash().HexString()), 301)
 		} else {
@@ -111,7 +113,7 @@ func addTorrentHandler(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				for _, f := range t.Files() {
-					f.PrioritizeRegion(0, f.Length()/100)
+					f.PrioritizeRegion(0, (f.Length()/100)*10)
 				}
 				http.Redirect(w, r, fmt.Sprintf("/torrents/%s", t.InfoHash().HexString()), 301)
 			}

@@ -55,9 +55,9 @@ ui:
 	mv web/statik src/streamy
 	
 build:
-	env GOOS=linux GOARCH=arm go build --ldflags '-w -X main.version=$(VERSION) -X main.commitHash=${COMMIT} -X main.branch=${BRANCH} -X main.buildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-armv7l $(APP_NAME)/cmd/$(APP_NAME)
-	env GOOS=linux GOARCH=arm64 go build --ldflags '-w -X main.version=$(VERSION) -X main.commitHash=${COMMIT} -X main.branch=${BRANCH} -X main.buildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-aarch64 $(APP_NAME)/cmd/$(APP_NAME)
-	env GOOS=linux GOARCH=amd64 go build --ldflags '-s -w -X main.version=$(VERSION) -X main.commitHash=${COMMIT} -X main.branch=${BRANCH} -X main.buildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-x86_64 $(APP_NAME)/cmd/$(APP_NAME)
+	env GOOS=linux GOARCH=arm go build --ldflags '-s -w -X $(APP_NAME)/version.Version=$(VERSION) -X $(APP_NAME)/version.CommitHash=${COMMIT} -X $(APP_NAME)/version.Branch=${BRANCH} -X $(APP_NAME)/version.BuildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-armv7l $(APP_NAME)/cmd/$(APP_NAME)
+	env GOOS=linux GOARCH=arm64 go build --ldflags '-s -w -X $(APP_NAME)/version.Version=$(VERSION) -X $(APP_NAME)/version.CommitHash=${COMMIT} -X $(APP_NAME)/version.Branch=${BRANCH} -X $(APP_NAME)/version.BuildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-aarch64 $(APP_NAME)/cmd/$(APP_NAME)
+	env GOOS=linux GOARCH=amd64 go build --ldflags '-s -w -X $(APP_NAME)/version.Version=$(VERSION) -X $(APP_NAME)/version.CommitHash=${COMMIT} -X $(APP_NAME)/version.Branch=${BRANCH} -X $(APP_NAME)/version.BuildTime=${BUILD_TIME}' -o $(APP_NAME)-Linux-x86_64 $(APP_NAME)/cmd/$(APP_NAME)
 
 package: build
 	mv -f $(APP_NAME)-Linux-armv7l service.streamy/bin/

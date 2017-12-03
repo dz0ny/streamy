@@ -1,7 +1,7 @@
 import * as axios from 'axios';
 
-const BASE = document.location.origin;
-//const BASE = "http://cubox:9092";
+//const BASE = document.location.origin;
+const BASE = "http://192.168.1.191:9092";
 
 
 function uploadTorrent(formData) {
@@ -9,9 +9,17 @@ function uploadTorrent(formData) {
   return axios.post(url, formData).then(x => x.data)
 }
 
-function addMagnet(magnet) {
-  const url = `${BASE}/torrents/add?magnet=${encodeURIComponent(magnet)}`;
+function ping() {
+  const url = `${BASE}/ping`;
   return axios.get(url).then(x => x.data)
+}
+
+
+function addMagnet(magnet) {
+  const url = `${BASE}/torrents/add`;
+  return axios.get(url, {params: {
+    magnet: encodeURIComponent(magnet)
+  }}).then(x => x.data)
 }
 
 function listTorrents() {
@@ -35,6 +43,7 @@ function deleteTorrent(ih) {
 }
 
 export {
+  ping,
   uploadTorrent,
   listTorrents,
   startTorrent,

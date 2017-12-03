@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"streamy/version"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/docgen"
 	"github.com/go-chi/docgen/raml"
@@ -16,10 +18,16 @@ var router = chi.NewRouter()
 func init() {
 
 	router.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-		pong := struct {
-			PING string
-		}{"PONG"}
-		render.JSON(w, r, pong)
+		info := struct {
+			BuildTime string `json:"buildTime"`
+			Commit    string `json:"commit"`
+			Release   string `json:"release"`
+			Branch    string `json:"branch"`
+		}{
+			version.BuildTime, version.CommitHash,
+			version.Version, version.Branch,
+		}
+		render.JSON(w, r, info)
 	})
 
 	// RESTy routes for "torrents" resource

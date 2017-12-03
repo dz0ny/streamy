@@ -6,5 +6,7 @@
       <setting label="Cache capacity" id="cache_capacity" type="text" default="4G" />
       <setting label="Max. upload rate in B/s" id="max_up_rate" type="text" default="10k" />
       <setting label="Max. download rate in B/s" id="max_do_rate" type="text" default="1G" />
+      <setting label="Max. connection per torrent" id="max_con_torr" type="text" default="40" />
+      <setting label="Max. connections" id="max_con_glob" type="text" default="100" />
    </category>
 </settings>

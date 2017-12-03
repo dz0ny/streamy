@@ -1,4 +1,5 @@
 <template>
+<div>
   <main role="main">
     <div class="jumbotron" vg-if="!showUploads">
       <div class="container">
@@ -65,10 +66,16 @@
       </div>
     </div>
   </main>
+  <footer class="footer">
+    <div class="container">
+      <span class="text-muted">v{{ version.release }}@{{ version.buildTime }}</span>
+    </div>
+  </footer>
+</div>
 </template>
 
 <script>
-  import * as streamy from './streamy.service';
+  import * as streamy from '@/streamy.service';
   import pb from 'pretty-bytes';
   const STATUS_INITIAL = 0, STATUS_SAVING = 1, STATUS_SUCCESS = 2, STATUS_FAILED = 3;
 
@@ -88,6 +95,7 @@
         magnet: null,
         uploadFieldName: 'torrent',
         showUploads: false,
+        version: {},
       }
     },
     computed: {
@@ -105,6 +113,13 @@
       }
     },
     methods: {
+      ping() {
+        // reset form to initial state
+        streamy.ping()
+          .then(x => {
+            this.version = x;
+          });
+      },
       list() {
         // reset form to initial state
         streamy.listTorrents()
@@ -160,24 +175,22 @@
       },
       filesChange(fieldName, fileList) {
         // handle file changes
-        const formData = new FormData();
-
         if (!fileList.length) return;
 
         // append the files to FormData
         Array
           .from(Array(fileList.length).keys())
           .map(x => {
+            var formData = new FormData();
             formData.append(fieldName, fileList[x], fileList[x].name);
+            this.save(formData);
           });
-
-        // save it
-        this.save(formData);
       }
     },
     mounted() {
       this.reset();
       this.list();
+      this.ping();
       setInterval(this.list, 5000);
     }
   }
@@ -189,6 +202,21 @@
 
   body{
     padding-top: 4.5rem;
+    margin-bottom: 30px; /* Margin bottom by footer height */
+  }
+
+  html {
+    position: relative;
+    min-height: 100%;
+  }
+
+  .footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 30px; /* Set the fixed height of the footer here */
+    line-height: 30px; /* Vertically center the text there */
+    background-color: #f5f5f5;
   }
 
   .dropbox {

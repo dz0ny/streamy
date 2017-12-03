@@ -1,5 +1,5 @@
 hash: fbefe5744aa6e2f0b59ee81abc105b635a0b86c6622aee072f667ec8fcc223df
-updated: 2017-11-26T15:41:56.658485703+01:00
+updated: 2017-12-14T21:37:27.860855815+01:00
 imports:
 - name: github.com/anacrolix/dht
   version: 55080c51975fdff03dc82a2c3a76a0e2995a69d6
@@ -8,13 +8,14 @@ imports:
 - name: github.com/anacrolix/go-libutp
   version: ab1d4f3b9abbf1bc88c1c2cce6defa7926b652cb
 - name: github.com/anacrolix/missinggo
-  version: 081ada5bb4413ac4f42cf047a8ee485b228778a0
+  version: 80d58ba10e649c63a4388257be87edd07bb6b16f
   subpackages:
   - bitmap
   - filecache
   - httptoo
   - inproc
   - iter
+  - mime
   - orderedmap
   - perf
   - pproffd
@@ -29,7 +30,7 @@ imports:
 - name: github.com/anacrolix/tagflag
   version: b463dd74daec5c6980001acf63951e26284f92f4
 - name: github.com/anacrolix/torrent
-  version: eed0743d4ef79ea86c263b2d7b56005ab91b5fc5
+  version: a41adc49b5fb2467f84f27b2395cb2bff052bfd5
   subpackages:
   - bencode
   - iplist
@@ -52,9 +53,9 @@ imports:
 - name: github.com/edsrzf/mmap-go
   version: 0bce6a6887123b67a60366d2c9fe2dfb74289d2e
 - name: github.com/glycerine/go-unsnap-stream
-  version: 87275cecd8e984c5875577d22da7ce8945df780e
+  version: 62a9a9eb44fd8932157b1a8ace2149eff5971af6
 - name: github.com/go-chi/chi
-  version: 04ec7fc4179604b2390947258f9143eaae23b596
+  version: 687d2792aedd8e8ac3bbd8592cf55b91d7ea8ce9
 - name: github.com/go-chi/docgen
   version: ac43d9a63f3b58b1e82922411d2de365d896ee72
   subpackages:
@@ -68,7 +69,7 @@ imports:
 - name: github.com/gorilla/mux
   version: 7f08801859139f86dfafd1c296e2cba9a80d292e
 - name: github.com/huandu/xstrings
-  version: d6590c0c31d16526217fa60fbd2067f7afcd78c5
+  version: 37469d0c81a7910b49d64a0d308ded4823e90937
 - name: github.com/jackpal/gateway
   version: 5795ac81146e01d3fab7bcf21c043c3d6a32b006
 - name: github.com/jackpal/go-nat-pmp
@@ -83,8 +84,12 @@ imports:
   version: 90eadee771aeab36e8bf796039b8c261bebebe4f
 - name: github.com/philhofer/fwd
   version: bb6d471dc95d4fe11e432687f8b70ff496cf3136
+- name: github.com/rakyll/statik
+  version: 016ca6fdb1b26618ff8f53fbd1109ff834524f23
+  subpackages:
+  - fs
 - name: github.com/RoaringBitmap/roaring
-  version: 5930de397dc5823f13e026b6094668c2dd526530
+  version: 01d244c43a7e8d1191a4f369f5908ea9eb9bc9ac
 - name: github.com/ryszard/goskiplist
   version: 2dfbae5fcf46374f166f8969cb07e167f1be6273
   subpackages:
@@ -92,7 +97,7 @@ imports:
 - name: github.com/spaolacci/murmur3
   version: 9f5d223c60793748f04a9d5b4b4eacddfc1f755d
 - name: github.com/tinylib/msgp
-  version: 3b556c64540842d4f82967be066a7f7fffc3adad
+  version: 5bb5e1aed7ba5bcc93307153b020e7ffe79b0509
   subpackages:
   - msgp
 - name: github.com/willf/bitset
@@ -100,7 +105,7 @@ imports:
 - name: github.com/willf/bloom
   version: 54e3b963ee1652b06c4562cb9b6020ebc6e36e59
 - name: golang.org/x/net
-  version: f315505cf3349909cdf013ea56690da34e96a451
+  version: 8351a756f30f1297fe94bbf4b767ec589c6ea6d0
   subpackages:
   - context
   - websocket

@@ -4,5 +4,7 @@
     <setting id="max_up_rate" value="10k" />
     <setting id="max_do_rate" value="1G" />
     <setting id="cache_capacity" value="4G" />
+    <setting id="max_con_torr" value="40" />
+    <setting id="max_con_glob" value="100" />
 </settings>
 

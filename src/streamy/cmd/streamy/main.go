@@ -18,29 +18,31 @@ import (
 	"golang.org/x/time/rate"
 
 	"streamy/core"
+	"streamy/version"
 )
 
-var version = ""
-var commitHash = ""
-var branch = ""
-var buildTime = ""
-
 var flags = struct {
-	Addr          string        `help:"HTTP listen address"`
-	CacheCapacity tagflag.Bytes `help:"Data cache capacity"`
-	TorrentGrace  time.Duration `help:"How long to wait to drop a torrent after its last request"`
-	FileDir       string        `help:"Piece storage path"`
-	Seed          bool          `help:"Seed data"`
-	UploadRate    tagflag.Bytes `help:"Upload rate limit"`
-	DownloadRate  tagflag.Bytes `help:"Download rate limit"`
-	Debug         bool          `help:"Verbose output"`
+	Addr                  string        `help:"HTTP listen address"`
+	CacheCapacity         tagflag.Bytes `help:"Data cache capacity"`
+	TorrentGrace          time.Duration `help:"How long to wait to drop a torrent after its last request"`
+	FileDir               string        `help:"Piece storage path"`
+	Seed                  bool          `help:"Seed data"`
+	UploadRate            tagflag.Bytes `help:"Upload rate limit"`
+	DownloadRate          tagflag.Bytes `help:"Download rate limit"`
+	Prefetch              tagflag.Bytes `help:"Prefetch limit"`
+	Debug                 bool          `help:"Verbose output"`
+	ConnectionsPerTorrent int           `help:"Limit Connections per torrent"`
+	ConnectionsGlobal     int           `help:"Limit global connections"`
 }{
-	Addr:          "0.0.0.0:9092",
-	CacheCapacity: 1 << 31,
-	TorrentGrace:  time.Minute * 1,
-	FileDir:       "filecache",
-	UploadRate:    25600,
-	DownloadRate:  1048576,
+	Addr:                  "0.0.0.0:9092",
+	CacheCapacity:         4000 << 20,
+	TorrentGrace:          time.Minute * 1,
+	FileDir:               "filecache",
+	UploadRate:            25600,
+	DownloadRate:          1048576,
+	ConnectionsPerTorrent: 40,
+	ConnectionsGlobal:     80,
+	Prefetch:              100 << 20,
 }
 
 func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error) {
@@ -59,6 +61,7 @@ func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error)
 		storageProvider := fc.AsResourceProvider()
 		return storage.NewResourcePieces(storageProvider)
 	}()
+
 	return torrent.NewClient(&torrent.Config{
 		IPBlocklist:    blocklist,
 		DefaultStorage: storage,
@@ -74,6 +77,10 @@ func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error)
 		DisableIPv6:         true,
 		UploadRateLimiter:   rate.NewLimiter(rate.Limit(flags.UploadRate), 256<<10),
 		DownloadRateLimiter: rate.NewLimiter(rate.Limit(flags.DownloadRate), 1<<20),
+
+		EstablishedConnsPerTorrent: flags.ConnectionsPerTorrent,
+		HalfOpenConnsPerTorrent:    flags.ConnectionsPerTorrent,
+		TorrentPeersHighWater:      flags.ConnectionsGlobal,
 
 		ExtendedHandshakeClientVersion: "Transmission/2.92",
 		Bep20: "-TR2920-",
@@ -98,8 +105,11 @@ func getPort() int {
 
 func main() {
 	log.SetFlags(log.Flags() | log.Lshortfile)
-	tagflag.Description(fmt.Sprintf("Streamy %s built at %s from commit %s@%s", version, buildTime, commitHash, branch))
-	tagflag.Parse(&flags)
+	desc := tagflag.Description(fmt.Sprintf(
+		"Streamy %s built at %s from commit %s@%s",
+		version.Version, version.BuildTime, version.CommitHash, version.Branch,
+	))
+	tagflag.Parse(&flags, desc)
 
 	freePort := getPort()
 
