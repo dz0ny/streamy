@@ -1,7 +1,7 @@
 import * as axios from 'axios';
 
-//const BASE = document.location.origin;
-const BASE = "http://192.168.1.191:9092";
+const BASE = document.location.origin;
+//const BASE = "http://192.168.1.191:9092";
 
 
 function uploadTorrent(formData) {

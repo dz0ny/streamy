@@ -69,12 +69,10 @@ func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error)
 			PublicIP:      ext,
 			StartingNodes: dht.GlobalBootstrapAddrs,
 		},
-		DisableAggressiveUpload: !flags.Seed,
 
 		Seed:  flags.Seed,
 		Debug: flags.Debug,
 
-		DisableIPv6:         true,
 		UploadRateLimiter:   rate.NewLimiter(rate.Limit(flags.UploadRate), 256<<10),
 		DownloadRateLimiter: rate.NewLimiter(rate.Limit(flags.DownloadRate), 1<<20),
 
@@ -83,7 +81,8 @@ func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error)
 		TorrentPeersHighWater:      flags.ConnectionsGlobal,
 
 		ExtendedHandshakeClientVersion: "Transmission/2.92",
-		Bep20: "-TR2920-",
+		HTTPUserAgent:                  "Transmission/2.92",
+		Bep20:                          "-TR2920-",
 
 		ListenAddr: fmt.Sprintf(":%d", freePort),
 	})

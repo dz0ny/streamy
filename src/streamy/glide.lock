@@ -1,15 +1,16 @@
 hash: fbefe5744aa6e2f0b59ee81abc105b635a0b86c6622aee072f667ec8fcc223df
-updated: 2017-12-14T21:37:27.860855815+01:00
+updated: 2018-01-13T16:07:29.628179203+01:00
 imports:
 - name: github.com/anacrolix/dht
-  version: 55080c51975fdff03dc82a2c3a76a0e2995a69d6
+  version: 4095758d71c71174c5452ba40812f4d82e248f2b
   subpackages:
   - krpc
 - name: github.com/anacrolix/go-libutp
-  version: ab1d4f3b9abbf1bc88c1c2cce6defa7926b652cb
+  version: 4aa1b27016b289f786f425fd1474274c1292aa0a
 - name: github.com/anacrolix/missinggo
-  version: 80d58ba10e649c63a4388257be87edd07bb6b16f
+  version: 87aae9c529891d465611bc99b63e1e673a73f1ae
   subpackages:
+  - assert
   - bitmap
   - filecache
   - httptoo
@@ -25,12 +26,16 @@ imports:
   - resource
   - slices
   - x
+- name: github.com/anacrolix/mmsg
+  version: 16d9a5f35402e33c2fe396f1aa7de06f245fa62d
+  subpackages:
+  - socket
 - name: github.com/anacrolix/sync
   version: eee974e4f8c1e1f38d16e32713dd408d6b02ca55
 - name: github.com/anacrolix/tagflag
-  version: b463dd74daec5c6980001acf63951e26284f92f4
+  version: 2146c8d41bf09f7aaef804137f2ae963088b6209
 - name: github.com/anacrolix/torrent
-  version: a41adc49b5fb2467f84f27b2395cb2bff052bfd5
+  version: 696595a76ea0a4796a74a89d79ceb91f1b17b642
   subpackages:
   - bencode
   - iplist
@@ -79,7 +84,7 @@ imports:
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/mattn/go-sqlite3
-  version: d5ffb5c0cca8778699a929b236766f4a7af674e8
+  version: 6c771bb9887719704b210e87e934f08be014bdb1
 - name: github.com/mschoch/smat
   version: 90eadee771aeab36e8bf796039b8c261bebebe4f
 - name: github.com/philhofer/fwd
@@ -89,7 +94,7 @@ imports:
   subpackages:
   - fs
 - name: github.com/RoaringBitmap/roaring
-  version: 01d244c43a7e8d1191a4f369f5908ea9eb9bc9ac
+  version: 0a6691af7cd3c226e37bcf45fa19f427b615edcd
 - name: github.com/ryszard/goskiplist
   version: 2dfbae5fcf46374f166f8969cb07e167f1be6273
   subpackages:
@@ -97,7 +102,7 @@ imports:
 - name: github.com/spaolacci/murmur3
   version: 9f5d223c60793748f04a9d5b4b4eacddfc1f755d
 - name: github.com/tinylib/msgp
-  version: 5bb5e1aed7ba5bcc93307153b020e7ffe79b0509
+  version: 428e467e72ad3e435f398b9b148f581c69444410
   subpackages:
   - msgp
 - name: github.com/willf/bitset

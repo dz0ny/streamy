@@ -68,7 +68,7 @@
   </main>
   <footer class="footer">
     <div class="container">
-      <span class="text-muted">v{{ version.release }}@{{ version.buildTime }}</span>
+      <small class="text-muted">v{{ version.release }}@{{ version.buildTime }}</small>
     </div>
   </footer>
 </div>
