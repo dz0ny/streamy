@@ -42,9 +42,13 @@ func NewTorrentWeb(t *torrent.Torrent) (tr TorrentWeb) {
 	var files []fileInfo
 
 	for _, f := range t.Info().Files {
-		path_ := strings.Join(f.Path, "/")
-		pi := fmt.Sprintf("?path=%s", path_)
-		fi := fileInfo{f, urlFor("file", hex) + pi, urlFor("stream", hex) + pi}
+		path := "/" + strings.Join(f.Path, "/")
+
+		fi := fileInfo{
+			f,
+			urlFor("file", hex) + path,
+			urlFor("stream", hex) + path,
+		}
 		files = append(files, fi)
 	}
 	tr = TorrentWeb{

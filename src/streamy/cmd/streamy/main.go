@@ -14,7 +14,6 @@ import (
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/iplist"
 	"github.com/anacrolix/torrent/storage"
-	"github.com/jackpal/gateway"
 	"golang.org/x/time/rate"
 
 	"streamy/core"
@@ -32,7 +31,6 @@ var flags = struct {
 	Prefetch              tagflag.Bytes `help:"Prefetch limit"`
 	Debug                 bool          `help:"Verbose output"`
 	ConnectionsPerTorrent int           `help:"Limit Connections per torrent"`
-	ConnectionsGlobal     int           `help:"Limit global connections"`
 }{
 	Addr:                  "0.0.0.0:9092",
 	CacheCapacity:         4000 << 20,
@@ -41,18 +39,28 @@ var flags = struct {
 	UploadRate:            25600,
 	DownloadRate:          1048576,
 	ConnectionsPerTorrent: 40,
-	ConnectionsGlobal:     80,
 	Prefetch:              100 << 20,
 }
 
-func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error) {
+func newTorrentClient(freePort int) (ret *torrent.Client, err error) {
 
 	if err != nil {
 		panic(err)
 	}
-	blocklist, err := iplist.MMapPacked("packed-blocklist")
+	blocklist, err := iplist.MMapPackedFile("packed-blocklist")
 	if err != nil {
 		log.Print(err)
+	} else {
+		defer func() {
+			if err != nil {
+				blocklist.Close()
+			} else {
+				go func() {
+					<-ret.Closed()
+					blocklist.Close()
+				}()
+			}
+		}()
 	}
 	storage := func() storage.ClientImpl {
 		fc, err := filecache.NewCache(flags.FileDir)
@@ -63,22 +71,18 @@ func newTorrentClient(freePort int, ext net.IP) (ret *torrent.Client, err error)
 	}()
 
 	return torrent.NewClient(&torrent.Config{
-		IPBlocklist:    blocklist,
-		DefaultStorage: storage,
 		DHTConfig: dht.ServerConfig{
-			PublicIP:      ext,
 			StartingNodes: dht.GlobalBootstrapAddrs,
 		},
-
-		Seed:  flags.Seed,
-		Debug: flags.Debug,
+		DefaultStorage: storage,
+		IPBlocklist:    blocklist,
+		Seed:           flags.Seed,
+		Debug:          flags.Debug,
 
 		UploadRateLimiter:   rate.NewLimiter(rate.Limit(flags.UploadRate), 256<<10),
 		DownloadRateLimiter: rate.NewLimiter(rate.Limit(flags.DownloadRate), 1<<20),
 
 		EstablishedConnsPerTorrent: flags.ConnectionsPerTorrent,
-		HalfOpenConnsPerTorrent:    flags.ConnectionsPerTorrent,
-		TorrentPeersHighWater:      flags.ConnectionsGlobal,
 
 		ExtendedHandshakeClientVersion: "Transmission/2.92",
 		HTTPUserAgent:                  "Transmission/2.92",
@@ -112,27 +116,9 @@ func main() {
 
 	freePort := getPort()
 
-	var gatewayIP net.IP
-	var ext net.IP
 	log.Printf("Torrent client port: %d", freePort)
-	log.Printf("useNATPMP but gateway not provided, trying discovery")
-	gatewayIP, err := gateway.DiscoverGateway()
-	if err != nil {
-		return
-	}
-	log.Printf("...discovered gateway IP: %s", gatewayIP)
-	log.Println("Using NAT-PMP to open port.")
-	if gatewayIP != nil {
-		nat := core.NewNatPMP(gatewayIP)
-		nat.AddPortMapping("tcp", freePort, freePort, "Streamy port TCP", 360000)
-		nat.AddPortMapping("udp", freePort, freePort, "Streamy port TCP", 360000)
-		defer nat.DeletePortMapping("tcp", freePort, freePort)
-		defer nat.DeletePortMapping("udp", freePort, freePort)
-		ext, err = nat.GetExternalAddress()
-		log.Printf("...discovered external IP: %s", ext)
-	}
 
-	cl, err := newTorrentClient(freePort, ext)
+	cl, err := newTorrentClient(freePort)
 	if err != nil {
 		log.Fatalf("error creating torrent client: %s", err)
 	}

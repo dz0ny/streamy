@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/anacrolix/missinggo"
-	"github.com/anacrolix/missinggo/httptoo"
 	"github.com/anacrolix/torrent"
 )
 
@@ -17,7 +17,7 @@ import (
 func torrentFileByPath(t *torrent.Torrent, path_ string) *torrent.File {
 	for _, f := range t.Files() {
 		if f.DisplayPath() == path_ {
-			return &f
+			return f
 		}
 	}
 	return nil
@@ -45,9 +45,12 @@ func saveTorrentFile(t *torrent.Torrent) (err error) {
 
 func listTorrents(c *torrent.Client) ([]TorrentWeb, error) {
 	var torrents []TorrentWeb
-	for _, t := range c.Torrents() {
-		torrents = append(torrents, NewTorrentWeb(t))
+	if torrentsC := c.Torrents(); torrentsC != nil {
+		for _, t := range torrentsC {
+			torrents = append(torrents, NewTorrentWeb(t))
+		}
 	}
+	sort.SliceStable(torrents, func(i, j int) bool { return torrents[i].InfoHash < torrents[j].InfoHash })
 	return torrents, nil
 }
 
@@ -61,14 +64,14 @@ func serveTorrent(w http.ResponseWriter, r *http.Request, t *torrent.Torrent) {
 	case <-r.Context().Done():
 		return
 	}
-	serveTorrentSection(w, r, t, 0, t.Length(), t.Name())
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, t.Name()))
+	serveReader(w, r, t.NewReader(), t.Name())
 }
 
-func serveTorrentSection(w http.ResponseWriter, r *http.Request, t *torrent.Torrent, offset, length int64, name string) {
-	tr := t.NewReader()
+func serveReader(w http.ResponseWriter, r *http.Request, tr torrent.Reader, name string) {
 	defer tr.Close()
-	tr.SetReadahead(100 << 20)
-	rs := missinggo.NewSectionReadSeeker(struct {
+	tr.SetReadahead(48 << 20)
+	rs := struct {
 		io.Reader
 		io.Seeker
 	}{
@@ -77,7 +80,7 @@ func serveTorrentSection(w http.ResponseWriter, r *http.Request, t *torrent.Torr
 			Ctx: r.Context(),
 		},
 		Seeker: tr,
-	}, offset, length)
+	}
 	http.ServeContent(w, r, name, time.Time{}, rs)
 }
 
@@ -87,6 +90,6 @@ func serveFile(w http.ResponseWriter, r *http.Request, t *torrent.Torrent, _path
 		http.Error(w, "file not found", http.StatusNotFound)
 		return
 	}
-	w.Header().Set("ETag", httptoo.EncodeQuotedString(fmt.Sprintf("%s/%s", t.InfoHash().HexString(), _path)))
-	serveTorrentSection(w, r, t, tf.Offset(), tf.Length(), _path)
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, tf.DisplayPath()))
+	serveReader(w, r, tf.NewReader(), _path)
 }
