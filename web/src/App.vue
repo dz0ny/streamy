@@ -33,18 +33,26 @@
     </div>
     <div class="container">
       <div class="row">
-        <table class="table">
+        <table v-if="uploadedFiles"  class="table">
           <thead class="thead-dark">
             <tr>
-              <th scope="col">Name</th>
+              <th scope="col">
+                <a href="#" @click.prevent="sortBy('name')">Name</a>
+                <chevron-up-icon class="fonticon-wrap" v-if="sortKey == 'name' && reverse" ></chevron-up-icon>
+                <chevron-down-icon class="fonticon-wrap" v-if="sortKey == 'name' && !reverse" ></chevron-down-icon>
+              </th>
               <th scope="col">Peers</th>
-              <th scope="col">Status</th>
+              <th scope="col">
+                <a href="#" @click.prevent="sortBy('Downloaded')">Status</a>
+                <chevron-up-icon class="fonticon-wrap" v-if="sortKey == 'Downloaded' && reverse" ></chevron-up-icon>
+                <chevron-down-icon class="fonticon-wrap" v-if="sortKey == 'Downloaded' && !reverse" ></chevron-down-icon>
+              </th>
               <th scope="col">Files</th>
               <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in uploadedFiles">
+            <tr v-for="item in orderBy(uploadedFiles, sortKey, reverse?reverse:-1)">
               <td>{{ item.name }}</td>
               <td>{{ item.stats.ActivePeers }}/{{ item.stats.TotalPeers }}</td>
               <td>{{ item.Downloaded | humanize }}/{{ item.Missing + item.Downloaded  | humanize }}</td>
@@ -75,176 +83,196 @@
 </template>
 
 <script>
-  import * as streamy from '@/streamy.service';
-  import pb from 'pretty-bytes';
-  const STATUS_INITIAL = 0, STATUS_SAVING = 1, STATUS_SUCCESS = 2, STATUS_FAILED = 3;
+import * as streamy from "@/streamy.service";
+import pb from "pretty-bytes";
 
-  export default {
-    name: 'app',
-    filters: {
-      humanize: function (value) {
-        return pb(value);
-      }
-    },
-    data() {
-      return {
-        uploadedFiles: [],
-        uploadError: null,
-        fileCount: null,
-        currentStatus: null,
-        magnet: null,
-        uploadFieldName: 'torrent',
-        showUploads: false,
-        version: {},
-      }
-    },
-    computed: {
-      isInitial() {
-        return this.currentStatus === STATUS_INITIAL;
-      },
-      isSaving() {
-        return this.currentStatus === STATUS_SAVING;
-      },
-      isSuccess() {
-        return this.currentStatus === STATUS_SUCCESS;
-      },
-      isFailed() {
-        return this.currentStatus === STATUS_FAILED;
-      }
-    },
-    methods: {
-      ping() {
-        // reset form to initial state
-        streamy.ping()
-          .then(x => {
-            this.version = x;
-          });
-      },
-      list() {
-        // reset form to initial state
-        streamy.listTorrents()
-          .then(x => {
-            this.uploadedFiles = x;
-          });
-      },
-      start(ih) {
-        // reset form to initial state
-        streamy.startTorrent(ih).then(x => {
-            this.list();
-        });
-      },
-      stop(ih) {
-        // reset form to initial state
-        streamy.stopTorrent(ih).then(x => {
-            this.list();
-        });
-      },
-      del(ih) {
-        // reset form to initial state
-        streamy.deleteTorrent(ih).then(x => {
-            this.list();
-        });
-      },
-      reset() {
-        // reset form to initial state
-        this.currentStatus = STATUS_INITIAL;
-        this.uploadError = null;
-        this.magnet = null;
-        this.fileCount = null;
-      },
-      addMagnet(magnet) {
-        this.currentStatus = STATUS_SAVING;
-        streamy.addMagnet(magnet)
-          .then(x => {
-            this.list();
-            this.reset();
-          })
-      },
-      save(formData) {
-        // upload data to the server
-        this.currentStatus = STATUS_SAVING;
+import { ChevronUpIcon, ChevronDownIcon } from 'vue-feather-icons'
 
-        streamy.uploadTorrent(formData)
-          .then(x => {
-            this.reset();
-            this.list();
-          })
-          .catch(err => {
-            this.reset();
-          });
-      },
-      filesChange(fieldName, fileList) {
-        // handle file changes
-        if (!fileList.length) return;
+const STATUS_INITIAL = 0,
+  STATUS_SAVING = 1,
+  STATUS_SUCCESS = 2,
+  STATUS_FAILED = 3;
 
-        // append the files to FormData
-        Array
-          .from(Array(fileList.length).keys())
-          .map(x => {
-            var formData = new FormData();
-            formData.append(fieldName, fileList[x], fileList[x].name);
-            this.save(formData);
-          });
-      }
-    },
-    mounted() {
-      this.reset();
-      this.list();
-      this.ping();
-      setInterval(this.list, 5000);
+export default {
+  name: "app",
+  components: {
+    ChevronDownIcon,
+    ChevronUpIcon,
+  },
+  filters: {
+    humanize: function(value) {
+      return pb(value);
     }
-  }
+  },
+  data() {
+    return {
+      uploadedFiles: [],
+      uploadError: null,
+      fileCount: null,
+      currentStatus: null,
+      magnet: null,
+      uploadFieldName: "torrent",
+      showUploads: false,
+      version: {},
+      sortKey: "name",
+      reverse: false,
+      columns: ["name", "age"]
+    };
+  },
+  computed: {
+    isInitial() {
+      return this.currentStatus === STATUS_INITIAL;
+    },
+    isSaving() {
+      return this.currentStatus === STATUS_SAVING;
+    },
+    isSuccess() {
+      return this.currentStatus === STATUS_SUCCESS;
+    },
+    isFailed() {
+      return this.currentStatus === STATUS_FAILED;
+    }
+  },
+  methods: {
+    ping() {
+      // reset form to initial state
+      streamy.ping().then(x => {
+        this.version = x;
+      });
+    },
+    sortBy(sortKey) {
+      this.reverse = this.sortKey == sortKey ? !this.reverse : false;
+      this.sortKey = sortKey;
+    },
+    list() {
+      // reset form to initial state
+      streamy.listTorrents().then(x => {
+        this.uploadedFiles = x;
+      });
+    },
+    start(ih) {
+      // reset form to initial state
+      streamy.startTorrent(ih).then(x => {
+        this.list();
+      });
+    },
+    stop(ih) {
+      // reset form to initial state
+      streamy.stopTorrent(ih).then(x => {
+        this.list();
+      });
+    },
+    del(ih) {
+      // reset form to initial state
+      streamy.deleteTorrent(ih).then(x => {
+        this.list();
+      });
+    },
+    reset() {
+      // reset form to initial state
+      this.currentStatus = STATUS_INITIAL;
+      this.uploadError = null;
+      this.magnet = null;
+      this.fileCount = null;
+    },
+    addMagnet(magnet) {
+      this.currentStatus = STATUS_SAVING;
+      streamy.addMagnet(magnet).then(x => {
+        this.list();
+        this.reset();
+      });
+    },
+    save(formData) {
+      // upload data to the server
+      this.currentStatus = STATUS_SAVING;
 
+      streamy
+        .uploadTorrent(formData)
+        .then(x => {
+          this.reset();
+          this.list();
+        })
+        .catch(err => {
+          this.reset();
+        });
+    },
+    filesChange(fieldName, fileList) {
+      // handle file changes
+      if (!fileList.length) return;
+
+      // append the files to FormData
+      Array.from(Array(fileList.length).keys()).map(x => {
+        var formData = new FormData();
+        formData.append(fieldName, fileList[x], fileList[x].name);
+        this.save(formData);
+      });
+    }
+  },
+  mounted() {
+    this.reset();
+    this.list();
+    this.ping();
+    setInterval(this.list, 5000);
+  }
+};
 </script>
 
 <style lang="scss">
-  $blue:    #2780E3 !default;
+$blue: #2780e3 !default;
 
-  body{
-    padding-top: 4.5rem;
-    margin-bottom: 30px; /* Margin bottom by footer height */
-  }
+body {
+  padding-top: 4.5rem;
+  margin-bottom: 30px; /* Margin bottom by footer height */
+}
 
-  html {
-    position: relative;
-    min-height: 100%;
-  }
+html {
+  position: relative;
+  min-height: 100%;
+}
 
-  .footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 30px; /* Set the fixed height of the footer here */
-    line-height: 30px; /* Vertically center the text there */
-    background-color: #f5f5f5;
-  }
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 30px; /* Set the fixed height of the footer here */
+  line-height: 30px; /* Vertically center the text there */
+  background-color: #f5f5f5;
+}
 
-  .dropbox {
-    outline: 2px dashed grey; /* the dash box */
-    outline-offset: -10px;
-    background: lighten( $blue, 30% );
-    color: dimgray;
-    padding: 10px 10px;
-    min-height: 200px; /* minimum height */
-    position: relative;
-    cursor: pointer;
-  }
+.dropbox {
+  outline: 2px dashed grey; /* the dash box */
+  outline-offset: -10px;
+  background: lighten($blue, 30%);
+  color: dimgray;
+  padding: 10px 10px;
+  min-height: 200px; /* minimum height */
+  position: relative;
+  cursor: pointer;
+}
 
-  .input-file {
-    opacity: 0; /* invisible but it's there! */
-    width: 90%;
-    height: 200px;
-    position: absolute;
-    cursor: pointer;
-  }
+.input-file {
+  opacity: 0; /* invisible but it's there! */
+  width: 90%;
+  height: 200px;
+  position: absolute;
+  cursor: pointer;
+}
 
-  .dropbox:hover {
-    background: lighten( $blue, 25% ); /* when mouse over to the drop zone, change color */
-  }
+.dropbox:hover {
+  background: lighten(
+    $blue,
+    25%
+  ); /* when mouse over to the drop zone, change color */
+}
 
-  .dropbox p {
-    font-size: 1.2em;
-    text-align: center;
-    padding: 50px 0;
-  }
+.dropbox p {
+  font-size: 1.2em;
+  text-align: center;
+  padding: 50px 0;
+}
+
+.fonticon-wrap {
+    width: 10px;
+    height: 10px;
+}
 </style>

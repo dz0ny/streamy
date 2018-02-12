@@ -16,7 +16,9 @@
     "pretty-bytes": "^4.0.2",
     "sass-loader": "^6.0.6",
     "vue": "^2.5.2",
-    "vue-router": "^3.0.1"
+    "vue-feather-icons": "^4.5.0",
+    "vue-router": "^3.0.1",
+    "vue2-filters": "^0.3.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
