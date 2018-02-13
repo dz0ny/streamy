@@ -1,23 +1,29 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"time"
+
+	"streamy/core"
+	"streamy/fs"
+	"streamy/version"
 
 	"github.com/anacrolix/dht"
 	"github.com/anacrolix/missinggo/filecache"
 	"github.com/anacrolix/missinggo/x"
 	"github.com/anacrolix/tagflag"
 	"github.com/anacrolix/torrent"
+	"github.com/hashicorp/mdns"
+	"github.com/jacobsa/fuse"
+
 	"github.com/anacrolix/torrent/iplist"
 	"github.com/anacrolix/torrent/storage"
 	"golang.org/x/time/rate"
-
-	"streamy/core"
-	"streamy/version"
 )
 
 var flags = struct {
@@ -31,6 +37,7 @@ var flags = struct {
 	Prefetch              tagflag.Bytes `help:"Prefetch limit"`
 	Debug                 bool          `help:"Verbose output"`
 	ConnectionsPerTorrent int           `help:"Limit Connections per torrent"`
+	MountDir              string        `help:"location where torrent contents are made available"`
 }{
 	Addr:                  "0.0.0.0:9092",
 	CacheCapacity:         4000 << 20,
@@ -40,6 +47,7 @@ var flags = struct {
 	DownloadRate:          1048576,
 	ConnectionsPerTorrent: 40,
 	Prefetch:              100 << 20,
+	MountDir:              "",
 }
 
 func newTorrentClient(freePort int) (ret *torrent.Client, err error) {
@@ -124,6 +132,28 @@ func main() {
 	}
 	defer cl.Close()
 
+	if flags.MountDir != "" {
+		go func() {
+			cfg := &fuse.MountConfig{
+				ReadOnly: true,
+			}
+			fsServer, err := fs.NewtorrentFS(cl)
+			if err != nil {
+				log.Fatalf("NewtorrentFS %v", err)
+			}
+			log.Printf("NewtorrentFS: %v", fsServer)
+			mfs, err := fuse.Mount(flags.MountDir, fsServer, cfg)
+			if err != nil {
+				log.Fatalf("Mount: %v", err)
+			}
+			// Wait for it to be unmounted.
+			if err = mfs.Join(context.Background()); err != nil {
+				log.Fatalf("Join: %v", err)
+			}
+		}()
+
+	}
+
 	l, err := net.Listen("tcp4", flags.Addr)
 	if err != nil {
 		log.Fatal(err)
@@ -131,11 +161,19 @@ func main() {
 	defer l.Close()
 
 	log.Printf("serving http at %s", l.Addr())
+
+	host, _ := os.Hostname()
+	info := []string{"My awesome service"}
+	service, _ := mdns.NewMDNSService(host, "_foobar._tcp", "", "", 8000, nil, info)
+
+	// Create the mDNS server, defer shutdown
+	server, _ := mdns.NewServer(&mdns.Config{Zone: service})
+	defer server.Shutdown()
+
 	h := &core.Handler{
 		TC:                cl,
 		TorrentCloseGrace: flags.TorrentGrace,
 	}
-
 	err = http.Serve(l, h)
 	if err != nil {
 		log.Fatal(err)
