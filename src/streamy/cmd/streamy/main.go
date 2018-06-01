@@ -1,16 +1,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"time"
 
 	"streamy/core"
-	"streamy/fs"
 	"streamy/version"
 
 	"github.com/anacrolix/dht"
@@ -18,12 +15,8 @@ import (
 	"github.com/anacrolix/missinggo/x"
 	"github.com/anacrolix/tagflag"
 	"github.com/anacrolix/torrent"
-	"github.com/hashicorp/mdns"
-	"github.com/jacobsa/fuse"
 
-	"github.com/anacrolix/torrent/iplist"
 	"github.com/anacrolix/torrent/storage"
-	"golang.org/x/time/rate"
 )
 
 var flags = struct {
@@ -52,24 +45,6 @@ var flags = struct {
 
 func newTorrentClient(freePort int) (ret *torrent.Client, err error) {
 
-	if err != nil {
-		panic(err)
-	}
-	blocklist, err := iplist.MMapPackedFile("packed-blocklist")
-	if err != nil {
-		log.Print(err)
-	} else {
-		defer func() {
-			if err != nil {
-				blocklist.Close()
-			} else {
-				go func() {
-					<-ret.Closed()
-					blocklist.Close()
-				}()
-			}
-		}()
-	}
 	storage := func() storage.ClientImpl {
 		fc, err := filecache.NewCache(flags.FileDir)
 		x.Pie(err)
@@ -79,16 +54,11 @@ func newTorrentClient(freePort int) (ret *torrent.Client, err error) {
 	}()
 
 	return torrent.NewClient(&torrent.Config{
-		DHTConfig: dht.ServerConfig{
-			StartingNodes: dht.GlobalBootstrapAddrs,
-		},
-		DefaultStorage: storage,
-		IPBlocklist:    blocklist,
-		Seed:           flags.Seed,
-		Debug:          flags.Debug,
-
-		UploadRateLimiter:   rate.NewLimiter(rate.Limit(flags.UploadRate), 256<<10),
-		DownloadRateLimiter: rate.NewLimiter(rate.Limit(flags.DownloadRate), 1<<20),
+		DhtStartingNodes: dht.GlobalBootstrapAddrs,
+		DefaultStorage:   storage,
+		Seed:             flags.Seed,
+		Debug:            flags.Debug,
+		DisableIPv6:      true,
 
 		EstablishedConnsPerTorrent: flags.ConnectionsPerTorrent,
 
@@ -96,7 +66,7 @@ func newTorrentClient(freePort int) (ret *torrent.Client, err error) {
 		HTTPUserAgent:                  "Transmission/2.92",
 		Bep20:                          "-TR2920-",
 
-		ListenAddr: fmt.Sprintf(":%d", freePort),
+		ListenPort: freePort,
 	})
 }
 
@@ -132,28 +102,6 @@ func main() {
 	}
 	defer cl.Close()
 
-	if flags.MountDir != "" {
-		go func() {
-			cfg := &fuse.MountConfig{
-				ReadOnly: true,
-			}
-			fsServer, err := fs.NewtorrentFS(cl)
-			if err != nil {
-				log.Fatalf("NewtorrentFS %v", err)
-			}
-			log.Printf("NewtorrentFS: %v", fsServer)
-			mfs, err := fuse.Mount(flags.MountDir, fsServer, cfg)
-			if err != nil {
-				log.Fatalf("Mount: %v", err)
-			}
-			// Wait for it to be unmounted.
-			if err = mfs.Join(context.Background()); err != nil {
-				log.Fatalf("Join: %v", err)
-			}
-		}()
-
-	}
-
 	l, err := net.Listen("tcp4", flags.Addr)
 	if err != nil {
 		log.Fatal(err)
@@ -161,14 +109,6 @@ func main() {
 	defer l.Close()
 
 	log.Printf("serving http at %s", l.Addr())
-
-	host, _ := os.Hostname()
-	info := []string{"My awesome service"}
-	service, _ := mdns.NewMDNSService(host, "_foobar._tcp", "", "", 8000, nil, info)
-
-	// Create the mDNS server, defer shutdown
-	server, _ := mdns.NewServer(&mdns.Config{Zone: service})
-	defer server.Shutdown()
 
 	h := &core.Handler{
 		TC:                cl,

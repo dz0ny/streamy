@@ -36,11 +36,6 @@
         <table v-if="uploadedFiles"  class="table">
           <thead class="thead-dark">
             <tr>
-              <th scope="col">
-                <a href="#" @click.prevent="sortBy('name')">Name</a>
-                <chevron-up-icon class="fonticon-wrap" v-if="sortKey == 'name' && reverse" ></chevron-up-icon>
-                <chevron-down-icon class="fonticon-wrap" v-if="sortKey == 'name' && !reverse" ></chevron-down-icon>
-              </th>
               <th scope="col">Peers</th>
               <th scope="col">
                 <a href="#" @click.prevent="sortBy('Downloaded')">Status</a>
@@ -53,7 +48,6 @@
           </thead>
           <tbody>
             <tr v-for="item in orderBy(uploadedFiles, sortKey, reverse?reverse:-1)">
-              <td>{{ item.name }}</td>
               <td>{{ item.stats.ActivePeers }}/{{ item.stats.TotalPeers }}</td>
               <td>{{ item.Downloaded | humanize }}/{{ item.Missing + item.Downloaded  | humanize }}</td>
               <td>
@@ -274,5 +268,26 @@ html {
 .fonticon-wrap {
     width: 10px;
     height: 10px;
+}
+.android .jumbotron{
+  display: none;
+}
+.android .table tbody td:nth-child(1){
+  display: none;
+}
+.android .table thead th:nth-child(1){
+  display: none;
+}
+.android .table tbody td:nth-child(2){
+  display: none;
+}
+.android .table thead th:nth-child(2){
+  display: none;
+}
+.android .table tbody td:nth-child(5){
+  display: none;
+}
+.android .table thead th:nth-child(5){
+  display: none;
 }
 </style>

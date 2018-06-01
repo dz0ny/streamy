@@ -81,26 +81,12 @@ func addMagnetHandler(w http.ResponseWriter, r *http.Request) {
 			trackers := [][]string{
 				[]string{"udp://tracker.cyberia.is:6969/announce"},
 				[]string{"udp://tracker.coppersurfer.tk:6969/announce"},
-				[]string{"udp://tracker.open-internet.nl:6969/announce"},
-				[]string{"udp://p4p.arenabg.com:1337/announce"},
-				[]string{"udp://tracker.internetwarriors.net:1337/announce"},
-				[]string{"udp://tracker.skyts.net:6969/announce"},
 				[]string{"udp://tracker.safe.moe:6969/announce"},
 				[]string{"udp://tracker.piratepublic.com:1337/announce"},
 				[]string{"udp://tracker.opentrackr.org:1337/announce"},
-				[]string{"udp://allesanddro.de:1337/announce"},
-				[]string{"udp://9.rarbg.to:2710/announce"},
-				[]string{"udp://tracker2.christianbro.pw:6969/announce"},
-				[]string{"udp://tracker1.wasabii.com.tw:6969/announce"},
-				[]string{"udp://tracker.zer0day.to:1337/announce"},
-				[]string{"udp://public.popcorn-tracker.org:6969/announce"},
-				[]string{"udp://inferno.demonoid.pw:3418/announce"},
-				[]string{"udp://tracker.xku.tv:6969/announce"},
-				[]string{"udp://tracker.vanitycore.co:6969/announce"},
-				[]string{"udp://tracker.mg64.net:6969/announce"},
-				[]string{"udp://open.facedatabg.net:6969/announc"},
 			}
 			t.AddTrackers(trackers)
+			t.DownloadPieces(1, 10)
 			http.Redirect(w, r, fmt.Sprintf("/torrents/%s", t.InfoHash().HexString()), 301)
 		} else {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -141,6 +127,7 @@ func addTorrentHandler(w http.ResponseWriter, r *http.Request) {
 				case <-r.Context().Done():
 					break
 				}
+				t.DownloadPieces(1, 10)
 				http.Redirect(w, r, fmt.Sprintf("/torrents/%s", t.InfoHash().HexString()), 301)
 			}
 		} else {

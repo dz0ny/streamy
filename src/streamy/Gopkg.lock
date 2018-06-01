@@ -4,8 +4,8 @@
 [[projects]]
   name = "github.com/RoaringBitmap/roaring"
   packages = ["."]
-  revision = "579959187317130bda443ec40f81c914e24b1396"
-  version = "v0.4.2"
+  revision = "1a28a7fa985680f9f4e1644c0a857ec359a444b0"
+  version = "v0.4.7"
 
 [[projects]]
   branch = "master"
@@ -14,27 +14,27 @@
     ".",
     "krpc"
   ]
-  revision = "0f2c5cd8da39f173f4337a5b40fa58f0b8a099d4"
+  revision = "73ef53210157d299b7d6f75bdbf9ea2278f86bd8"
 
 [[projects]]
   branch = "master"
   name = "github.com/anacrolix/go-libutp"
   packages = ["."]
-  revision = "9210d2a2d88831922092376c5623fb94249febed"
+  revision = "6518950894913db5a03a37e07ed50d307b12c1e2"
 
 [[projects]]
   branch = "master"
   name = "github.com/anacrolix/log"
   packages = ["."]
-  revision = "d828a5cc5098a92bf014afb160fe144eecaaf856"
+  revision = "2323884b361d84490c06cf5f4e8f8f3f8b6abd67"
 
 [[projects]]
   branch = "master"
   name = "github.com/anacrolix/missinggo"
   packages = [
     ".",
-    "assert",
     "bitmap",
+    "expect",
     "filecache",
     "httptoo",
     "inproc",
@@ -50,7 +50,7 @@
     "slices",
     "x"
   ]
-  revision = "f32f2dc367fb4fc0167b83145459f567abd59c49"
+  revision = "ca16e9f398a905bb3100a03a90959fba127c31a1"
 
 [[projects]]
   branch = "master"
@@ -59,13 +59,13 @@
     ".",
     "socket"
   ]
-  revision = "16d9a5f35402e33c2fe396f1aa7de06f245fa62d"
+  revision = "a4a3ba1fc8bb6400db01c47508156bf9c67156c6"
 
 [[projects]]
   branch = "master"
   name = "github.com/anacrolix/sync"
   packages = ["."]
-  revision = "eee974e4f8c1e1f38d16e32713dd408d6b02ca55"
+  revision = "3870fa5b90c5418faca1864cdc0cb1b6bb155aa8"
 
 [[projects]]
   branch = "master"
@@ -88,7 +88,7 @@
     "storage",
     "tracker"
   ]
-  revision = "5a7c4fc135eda0996079a46b43bc0ee8116d7093"
+  revision = "4e257ffdcfe2759b6386e41174710b52f901b0d5"
 
 [[projects]]
   branch = "master"
@@ -136,7 +136,7 @@
   branch = "master"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
-  revision = "bb3d318650d48840a39aa21a027c6630e198e626"
+  revision = "02af3965c54e8cacf948b97fef38925c4120652c"
 
 [[projects]]
   branch = "master"
@@ -148,13 +148,13 @@
   branch = "master"
   name = "github.com/glycerine/go-unsnap-stream"
   packages = ["."]
-  revision = "62a9a9eb44fd8932157b1a8ace2149eff5971af6"
+  revision = "9f0cb55181dd3a0a4c168d3dbc72d4aca4853126"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-chi/chi"
   packages = ["."]
-  revision = "e223a795a06a5598451cf022558c17c779f5a7ab"
+  revision = "cca4135d8dddff765463feaf1118047a9e506b4a"
 
 [[projects]]
   name = "github.com/go-chi/docgen"
@@ -185,7 +185,7 @@
   branch = "master"
   name = "github.com/golang/snappy"
   packages = ["."]
-  revision = "553a641470496b2327abcac10b36396bd98e45c9"
+  revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
 
 [[projects]]
   branch = "master"
@@ -194,51 +194,10 @@
   revision = "e89373fe6b4a7413d7acd6da1725b83ef713e6e4"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/go.net"
-  packages = [
-    "internal/iana",
-    "ipv4",
-    "ipv6"
-  ]
-  revision = "104dcad90073cd8d1e6828b2af19185b60cf3e29"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/mdns"
-  packages = ["."]
-  revision = "4e527d9d808175f132f949523e640c699e4253bb"
-
-[[projects]]
-  branch = "master"
   name = "github.com/huandu/xstrings"
   packages = ["."]
   revision = "2bf18b218c51864a87384c06996e40ff9dcff8e1"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/jacobsa/fuse"
-  packages = [
-    ".",
-    "fuseops",
-    "fuseutil",
-    "internal/buffer",
-    "internal/freelist",
-    "internal/fusekernel"
-  ]
-  revision = "3b434060032d594d1a6f5145e7b100bc09ebd1b5"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/jacobsa/oglematchers"
-  packages = ["."]
-  revision = "141901ea67cd4769c6800aa7bfdfc558fa22bda5"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/jacobsa/timeutil"
-  packages = ["."]
-  revision = "577e5acbbcf60f68c80c6f5edfeefe50e477c853"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -250,19 +209,13 @@
   branch = "master"
   name = "github.com/kballard/go-shellquote"
   packages = ["."]
-  revision = "cd60e84ee657ff3dc51de0b4f55dd299a3e136f2"
+  revision = "95032a82bc518f77982ea72343cc1ade730072f0"
 
 [[projects]]
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
-  revision = "6c771bb9887719704b210e87e934f08be014bdb1"
-  version = "v1.6.0"
-
-[[projects]]
-  name = "github.com/miekg/dns"
-  packages = ["."]
-  revision = "5364553f1ee9cddc7ac8b62dce148309c386695b"
-  version = "v1.0.4"
+  revision = "323a32be5a2421b8c7087225079c6c900ec397cd"
+  version = "v1.7.0"
 
 [[projects]]
   branch = "master"
@@ -304,7 +257,7 @@
   branch = "master"
   name = "github.com/rakyll/statik"
   packages = ["fs"]
-  revision = "016ca6fdb1b26618ff8f53fbd1109ff834524f23"
+  revision = "eab4de8dac7ec0cb3a6d9218d95ffe441832cb36"
 
 [[projects]]
   branch = "master"
@@ -323,6 +276,12 @@
   packages = ["."]
   revision = "9f5d223c60793748f04a9d5b4b4eacddfc1f755d"
   version = "v1.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/syncthing/notify"
+  packages = ["."]
+  revision = "b9ceffc925039c77cd9e0d38f248279ccc4399e2"
 
 [[projects]]
   name = "github.com/syncthing/syncthing"
@@ -344,8 +303,8 @@
     "lib/util",
     "lib/versioner"
   ]
-  revision = "27d5b17096847d16d01421c30151969adda36628"
-  version = "v0.14.44"
+  revision = "a1b5a3d5c0d29cbf653804740cb2e0080284b8e4"
+  version = "v0.14.47"
 
 [[projects]]
   name = "github.com/tinylib/msgp"
@@ -367,39 +326,25 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/zillode/notify"
-  packages = ["."]
-  revision = "a8abcfb1ce88ee8d79a300ed65d94b8fb616ddb3"
-
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/crypto"
-  packages = [
-    "ed25519",
-    "ed25519/internal/edwards25519"
-  ]
-  revision = "91a49db82a88618983a78a06c1cbd4e00ab749ab"
-
-[[projects]]
-  branch = "master"
   name = "golang.org/x/net"
   packages = [
     "bpf",
     "context",
     "internal/iana",
     "internal/socket",
+    "internal/socks",
     "ipv4",
     "ipv6",
     "proxy",
     "websocket"
   ]
-  revision = "22ae77b79946ea320088417e4d50825671d82d57"
+  revision = "dfa909b99c79129e1100513e5cd36307665e5723"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "dd2ff4accc098aceecb86b36eaa7829b2a17b1c9"
+  revision = "c11f84a56e43e20a78cee75a7c034031ecf57d1f"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -418,17 +363,17 @@
   branch = "master"
   name = "golang.org/x/time"
   packages = ["rate"]
-  revision = "6dc17368e09b0e8634d71cac8168d853e869a0c7"
+  revision = "fbb02b2291d28baffd63558aa44b4b56f178d650"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "7f97868eec74b32b0982dd158a51a446d1da7eb5"
-  version = "v2.1.1"
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7d1a0eb64a792cb01a35cb3064f3b26967b2680109b20fbc516e59c148791642"
+  inputs-digest = "f78b3dc31fc8402f02945805dfa89621d1f1b7e6bdd33e765f495d2f0be74b32"
   solver-name = "gps-cdcl"
   solver-version = 1

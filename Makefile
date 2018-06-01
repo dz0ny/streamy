@@ -18,7 +18,7 @@ version_flags = -X $(PKG)/version.Version=$(VERSION) \
 
 .PHONY: $(TARGETS)
 $(TARGETS):
-	env CGO_ENABLED=0 GOOS=$(goos) GOARCH=$(goarch) go build --ldflags '-s -w $(version_flags)' -o $(output) $(PKG)/cmd/$(PKG)
+	env GOOS=$(goos) GOARCH=$(goarch) go build --ldflags '-s -w $(version_flags)' -o $(output) $(PKG)/cmd/$(PKG)
 
 #
 # Build all defined targets
@@ -35,8 +35,8 @@ install: build
 #
 # Install locked dependecies
 #
-sync: bin/dep
-	cd src/$(PKG); dep init
+ensure: bin/dep
+	cd src/$(PKG); dep ensure
 
 #
 # Update all locked dependecies
@@ -52,6 +52,9 @@ bin/github-release:
 
 bin/gocov:
 	go get -u github.com/axw/gocov/gocov
+
+bin/statik:
+	go get github.com/rakyll/statik
 
 bin/gometalinter:
 	go get -u github.com/alecthomas/gometalinter
@@ -79,7 +82,7 @@ cover: bin/gocov
 
 all: deps sync build test
 
-ui:
+ui: bin/statik
 	cd web; npm run build
 	rm -rf src/streamy/statik
 	mv web/statik src/streamy
@@ -93,7 +96,9 @@ node_modules/.bin/api-console:
 	
 docs: node_modules/.bin/api-console
 	node_modules/.bin/api-console build api.raml
-
+tv:
+	gomobile bind -target=android/arm64 -ldflags '-s -w $(version_flags)' -o android/app/libs/tv.aar streamy/cmd/tv
+	
 release: package
 	github-release upload \
 		--user dz0ny \
