@@ -2,7 +2,7 @@
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/details_fragment"
-    android:name="xyz.dz0ny.streamy.fragment.MovieDetailsFragment"
+    android:name="xyz.dz0ny.streamy.fragment.TorrentDetailsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activity.DetailsActivity"

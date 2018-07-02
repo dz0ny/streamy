@@ -40,16 +40,29 @@ type TorrentWeb struct {
 func NewTorrentWeb(t *torrent.Torrent) (tr TorrentWeb) {
 	hex := t.InfoHash().HexString()
 	var files []fileInfo
+	if t.Info() != nil {
+		if t.Info().Files == nil {
+			name := t.Info().Name
+			path := "/" + name
 
-	for _, f := range t.Info().Files {
-		path := "/" + strings.Join(f.Path, "/")
+			fi := fileInfo{
+				metainfo.FileInfo{Length: t.Info().Length, Path: []string{name}},
+				urlFor("file", hex) + path,
+				urlFor("stream", hex) + path,
+			}
+			files = append(files, fi)
+		} else {
+			for _, f := range t.Info().Files {
+				path := "/" + strings.Join(f.Path, "/")
 
-		fi := fileInfo{
-			f,
-			urlFor("file", hex) + path,
-			urlFor("stream", hex) + path,
+				fi := fileInfo{
+					f,
+					urlFor("file", hex) + path,
+					urlFor("stream", hex) + path,
+				}
+				files = append(files, fi)
+			}
 		}
-		files = append(files, fi)
 	}
 	tr = TorrentWeb{
 		Name:       t.String(),

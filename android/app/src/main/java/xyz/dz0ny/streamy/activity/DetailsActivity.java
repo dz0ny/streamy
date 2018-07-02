@@ -32,7 +32,7 @@ public class DetailsActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_torrent);
+        setContentView(R.layout.activity_movie);
     }
 
 }

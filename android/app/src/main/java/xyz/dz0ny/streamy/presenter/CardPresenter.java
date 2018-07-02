@@ -14,16 +14,17 @@
 
 package xyz.dz0ny.streamy.presenter;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.view.ContextThemeWrapper;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
-import timber.log.Timber;
 import xyz.dz0ny.streamy.R;
 import xyz.dz0ny.streamy.remote.popcorn.models.PopcornMovie;
 import xyz.dz0ny.streamy.remote.popcorn.models.PopcornShow;
@@ -39,6 +40,7 @@ public class CardPresenter extends Presenter {
     private static final int CARD_HEIGHT = 413;
     private static int sSelectedBackgroundColor;
     private static int sDefaultBackgroundColor;
+    Context mContext;
     private Drawable mDefaultCardImage;
 
     private static void updateCardBackgroundColor(ImageCardView view, boolean selected) {
@@ -51,7 +53,14 @@ public class CardPresenter extends Presenter {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
-        Timber.d("onCreateViewHolder");
+        if (mContext == null) {
+            // We do this to avoid creating a new ContextThemeWrapper for each one of the cards
+            // If we look inside the ImageCardView they warn us about the same this.
+            // Example: Try using the constructor: ImageCardView(context, style)
+            // It is deprecated right? This is because that constructor creates a new ContextThemeWrapper every time a
+            // ImageCardView is allocated.
+            mContext = new ContextThemeWrapper(parent.getContext(), R.style.AppTheme);
+        }
 
         sDefaultBackgroundColor =
                 ContextCompat.getColor(parent.getContext(), R.color.default_background);
@@ -65,7 +74,7 @@ public class CardPresenter extends Presenter {
         mDefaultCardImage = ContextCompat.getDrawable(parent.getContext(), R.drawable.movie);
 
         ImageCardView cardView =
-                new ImageCardView(parent.getContext()) {
+                new ImageCardView(mContext) {
                     @Override
                     public void setSelected(boolean selected) {
                         updateCardBackgroundColor(this, selected);
@@ -85,7 +94,6 @@ public class CardPresenter extends Presenter {
         ImageCardView cardView = (ImageCardView) viewHolder.view;
         if (item instanceof PopcornMovie) {
             PopcornMovie movie = (PopcornMovie) item;
-            Timber.d("onBindViewHolder Movie");
             cardView.setTitleText(movie.getTitle());
             cardView.setContentText(movie.getInfo());
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
@@ -98,7 +106,6 @@ public class CardPresenter extends Presenter {
         }
         if (item instanceof PopcornShow) {
             PopcornShow show = (PopcornShow) item;
-            Timber.d("onBindViewHolder Show");
             cardView.setTitleText(show.getTitle());
             cardView.setContentText(show.getInfo());
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
@@ -113,7 +120,6 @@ public class CardPresenter extends Presenter {
 
     @Override
     public void onUnbindViewHolder(Presenter.ViewHolder viewHolder) {
-        Timber.d("onUnbindViewHolder");
         ImageCardView cardView = (ImageCardView) viewHolder.view;
         // Remove references to images so that the garbage collector can free up memory
         cardView.setBadgeImage(null);

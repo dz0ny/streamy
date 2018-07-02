@@ -15,9 +15,13 @@
 package xyz.dz0ny.streamy.activity;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import xyz.dz0ny.streamy.R;
+import xyz.dz0ny.streamy.service.Server;
 
 /*
  * MainActivity class that loads {@link MainFragment}.
@@ -29,4 +33,24 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!isMyServiceRunning(Server.class)) {
+            Intent intent = new Intent(this, Server.class);
+            this.startService(intent);
+        }
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

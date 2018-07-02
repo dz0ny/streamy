@@ -24,7 +24,7 @@ func torrentFileByPath(t *torrent.Torrent, path_ string) *torrent.File {
 }
 
 func saveTorrentFile(t *torrent.Torrent) (err error) {
-	p := filepath.Join("torrents", t.InfoHash().HexString()+".torrent")
+	p := filepath.Join(StorageRoot, "torrents", t.InfoHash().HexString()+".torrent")
 	ps := p + ".save"
 	os.MkdirAll(filepath.Dir(ps), 0750)
 	f, err := os.OpenFile(ps, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0660)
@@ -49,8 +49,8 @@ func listTorrents(c *torrent.Client) ([]TorrentWeb, error) {
 		for _, t := range torrentsC {
 			torrents = append(torrents, NewTorrentWeb(t))
 		}
+		sort.SliceStable(torrents, func(i, j int) bool { return torrents[i].InfoHash < torrents[j].InfoHash })
 	}
-	sort.SliceStable(torrents, func(i, j int) bool { return torrents[i].InfoHash < torrents[j].InfoHash })
 	return torrents, nil
 }
 

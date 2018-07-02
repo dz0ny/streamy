@@ -71,9 +71,6 @@ func addMagnetHandler(w http.ResponseWriter, r *http.Request) {
 		if t, err := c.AddMagnet(uri); err == nil {
 			select {
 			case <-t.GotInfo():
-				if err := saveTorrentFile(t); err != nil {
-					log.Printf("error saving torrent file: %s", err)
-				}
 				break
 			case <-r.Context().Done():
 				break

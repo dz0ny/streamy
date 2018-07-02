@@ -16,7 +16,6 @@ package xyz.dz0ny.streamy.activity;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,6 +26,8 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import xyz.dz0ny.streamy.service.Server;
+import xyz.dz0ny.streamy.utils.VLC;
+
 
 
 /*
@@ -47,11 +48,7 @@ public class WebActivity extends Activity {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String loc = request.getUrl().toString();
                 if (loc.endsWith(".mkv") || loc.endsWith(".mp4") || loc.endsWith(".avi")) {
-                    Intent vlcIntent = new Intent(Intent.ACTION_VIEW);
-                    vlcIntent.setPackage("org.videolan.vlc");
-                    vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
-                    vlcIntent.setDataAndTypeAndNormalize(request.getUrl(), "video/*");
-                    getApplicationContext().startActivity(vlcIntent);
+                    getApplicationContext().startActivity(VLC.Intent("Web", request.getUrl()));
                     return true;
                 }
                 return false;

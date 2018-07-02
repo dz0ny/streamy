@@ -14,29 +14,26 @@
 
 package xyz.dz0ny.streamy.fragment;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.StrictMode;
 import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.BrowseFragment;
-import android.support.v17.leanback.app.BrowseSupportFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ImageCardView;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
-import android.support.v17.leanback.widget.OnItemViewClickedListener;
-import android.support.v17.leanback.widget.OnItemViewSelectedListener;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -54,25 +51,31 @@ import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 import xyz.dz0ny.streamy.R;
 import xyz.dz0ny.streamy.activity.DetailsActivity;
+import xyz.dz0ny.streamy.activity.SearchActivity;
 import xyz.dz0ny.streamy.activity.ShowActivity;
+import xyz.dz0ny.streamy.activity.TorrentActivity;
 import xyz.dz0ny.streamy.adapter.MoviesAdapterPopcorn;
 import xyz.dz0ny.streamy.adapter.PopcornPaginationAdapter;
 import xyz.dz0ny.streamy.adapter.ShowsAdapterPopcorn;
+import xyz.dz0ny.streamy.presenter.TorrentPresenter;
 import xyz.dz0ny.streamy.remote.ApiCalls;
 import xyz.dz0ny.streamy.remote.popcorn.models.PopcornMovie;
 import xyz.dz0ny.streamy.remote.popcorn.models.PopcornShow;
+import xyz.dz0ny.streamy.remote.streamy.models.StreamyTorrent;
 
-public class MainFragment extends BrowseSupportFragment {
+public class MainFragment extends BrowseFragment {
 
     private static final int BACKGROUND_UPDATE_DELAY = 300;
 
     private final Handler mHandler = new Handler();
+    private final int REQUEST_PERMISSION_RECORD_AUDIO = 0;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
     private Timer mBackgroundTimer;
     private String mBackgroundUri;
     private BackgroundManager mBackgroundManager;
     private ArrayObjectAdapter rowsAdapter;
+    private ArrayObjectAdapter torrents;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -118,7 +121,29 @@ public class MainFragment extends BrowseSupportFragment {
         addShowsubscription(rateds);
         rowsAdapter.add(new ListRow(new HeaderItem(5, "Shows by Rating"), rateds));
 
+        torrents = new ArrayObjectAdapter(new TorrentPresenter());
+        addTorrentsSubscription(torrents);
+        rowsAdapter.add(new ListRow(new HeaderItem(6, "Torrents"), torrents));
+
         setAdapter(rowsAdapter);
+    }
+
+    @SuppressLint("CheckResult")
+    private void addTorrentsSubscription(ArrayObjectAdapter adapter) {
+        ApiCalls.getTorrents()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                .subscribe(
+                        torrents -> bindTorrentDetails(torrents, adapter),
+                        throwable -> new Handler().postDelayed(() -> addTorrentsSubscription(adapter), 5000)
+                );
+    }
+
+    private void bindTorrentDetails(List<StreamyTorrent> torrents, ArrayObjectAdapter adapter) {
+        if (!torrents.isEmpty()) {
+            adapter.addAll(0, torrents);
+        }
     }
 
     @SuppressLint("CheckResult")
@@ -193,19 +218,42 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
     private void setupEventListeners() {
-        setOnSearchClickedListener(view ->
-                Toast.makeText(getActivity(), "Implement your own in-app search", Toast.LENGTH_LONG)
-                        .show());
+        setOnSearchClickedListener(view -> {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                requestPermissions(
+                        new String[]{Manifest.permission.RECORD_AUDIO},
+                        REQUEST_PERMISSION_RECORD_AUDIO);
+
+            } else {
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                startActivity(intent);
+            }
+        });
 
         setOnItemViewClickedListener(this::getOnItemViewClickedListener);
         setOnItemViewSelectedListener(this::getOnItemViewSelectedListener);
     }
 
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSION_RECORD_AUDIO) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // launch SearchActivity
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                startActivity(intent);
+            } else {
+            }
+        }
+    }
+
     private void getOnItemViewSelectedListener(
-        Presenter.ViewHolder itemViewHolder,
-        Object item,
-        RowPresenter.ViewHolder rowViewHolder,
-        Row row
+            Presenter.ViewHolder itemViewHolder,
+            Object item,
+            RowPresenter.ViewHolder rowViewHolder,
+            Row row
     ) {
         if (item instanceof PopcornMovie) {
             mBackgroundUri = ((PopcornMovie) item).getImages().getFanart();
@@ -229,13 +277,16 @@ public class MainFragment extends BrowseSupportFragment {
                 addShowsubscription(adapter);
             }
         }
+        if (item instanceof StreamyTorrent) {
+            addTorrentsSubscription(torrents);
+        }
     }
 
     private void getOnItemViewClickedListener(
-        Presenter.ViewHolder itemViewHolder,
-        Object item,
-        RowPresenter.ViewHolder rowViewHolder,
-        Row row
+            Presenter.ViewHolder itemViewHolder,
+            Object item,
+            RowPresenter.ViewHolder rowViewHolder,
+            Row row
     ) {
 
         if (item instanceof PopcornMovie) {
@@ -262,6 +313,20 @@ public class MainFragment extends BrowseSupportFragment {
                     getActivity(),
                     ((ImageCardView) itemViewHolder.view).getMainImageView(),
                     ShowActivity.SHARED_ELEMENT_NAME)
+                    .toBundle();
+            getActivity().startActivity(intent, bundle);
+        }
+
+        if (item instanceof StreamyTorrent) {
+            StreamyTorrent torrent = (StreamyTorrent) item;
+            Timber.d("Item: %s", item.toString());
+            Intent intent = new Intent(getActivity(), TorrentActivity.class);
+            intent.putExtra(TorrentActivity.SHOW, torrent);
+
+            Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    getActivity(),
+                    ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                    TorrentActivity.SHARED_ELEMENT_NAME)
                     .toBundle();
             getActivity().startActivity(intent, bundle);
         }

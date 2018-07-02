@@ -11,6 +11,7 @@ public class ShowDetails implements Serializable {
     static final long serialVersionUID = 1272346175075960653L;
 
     private String imdb_id;
+    private String tvdb_id;
     private String title;
     private String synopsis;
     private String status;
@@ -40,6 +41,7 @@ public class ShowDetails implements Serializable {
         List<Episode> eps = new ArrayList<>();
         for (Episode ep : episodes) {
             if (ep.season == season) {
+                ep.show_tvdb_id = tvdb_id;
                 eps.add(ep);
             }
         }

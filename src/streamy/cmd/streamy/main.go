@@ -10,7 +10,6 @@ import (
 	"streamy/core"
 	"streamy/version"
 
-	"github.com/anacrolix/dht"
 	"github.com/anacrolix/missinggo/filecache"
 	"github.com/anacrolix/missinggo/x"
 	"github.com/anacrolix/tagflag"
@@ -44,7 +43,7 @@ var flags = struct {
 }
 
 func newTorrentClient(freePort int) (ret *torrent.Client, err error) {
-
+	core.StorageRoot = flags.FileDir
 	storage := func() storage.ClientImpl {
 		fc, err := filecache.NewCache(flags.FileDir)
 		x.Pie(err)
@@ -52,22 +51,15 @@ func newTorrentClient(freePort int) (ret *torrent.Client, err error) {
 		storageProvider := fc.AsResourceProvider()
 		return storage.NewResourcePieces(storageProvider)
 	}()
+	conf := torrent.NewDefaultClientConfig()
+	conf.DefaultStorage = storage
+	conf.ListenPort = freePort
+	conf.EstablishedConnsPerTorrent = flags.ConnectionsPerTorrent
 
-	return torrent.NewClient(&torrent.Config{
-		DhtStartingNodes: dht.GlobalBootstrapAddrs,
-		DefaultStorage:   storage,
-		Seed:             flags.Seed,
-		Debug:            flags.Debug,
-		DisableIPv6:      true,
-
-		EstablishedConnsPerTorrent: flags.ConnectionsPerTorrent,
-
-		ExtendedHandshakeClientVersion: "Transmission/2.92",
-		HTTPUserAgent:                  "Transmission/2.92",
-		Bep20:                          "-TR2920-",
-
-		ListenPort: freePort,
-	})
+	conf.ExtendedHandshakeClientVersion = "Transmission/2.92"
+	conf.HTTPUserAgent = "Transmission/2.92"
+	conf.Bep20 = "-TR2920-"
+	return torrent.NewClient(conf)
 }
 
 func getPort() int {

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="xyz.dz0ny.streamy">
 
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -63,6 +64,8 @@
         </activity>
         <activity android:name=".activity.DetailsActivity" />
         <activity android:name=".activity.ShowActivity" />
+        <activity android:name=".activity.SearchActivity" />
+        <activity android:name=".activity.TorrentActivity" />
     </application>
 
 </manifest>

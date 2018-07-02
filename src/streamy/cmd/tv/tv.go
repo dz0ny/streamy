@@ -9,7 +9,6 @@ import (
 
 	"streamy/core"
 
-	"github.com/anacrolix/dht"
 	"github.com/anacrolix/missinggo/filecache"
 	"github.com/anacrolix/missinggo/x"
 	"github.com/anacrolix/tagflag"
@@ -46,24 +45,14 @@ func newTorrentClient(dir string, freePort int) (ret *torrent.Client, err error)
 		storageProvider := fc.AsResourceProvider()
 		return storage.NewResourcePieces(storageProvider)
 	}()
+	conf := torrent.NewDefaultClientConfig()
+	conf.DefaultStorage = storage
+	conf.ListenPort = freePort
 
-	return torrent.NewClient(&torrent.Config{
-		DhtStartingNodes: dht.GlobalBootstrapAddrs,
-		DefaultStorage:   storage,
-		Seed:             flags.Seed,
-		Debug:            flags.Debug,
-		DisableIPv6:      true,
-
-		EstablishedConnsPerTorrent: 40,
-		HalfOpenConnsPerTorrent:    40,
-		TorrentPeersHighWater:      100,
-
-		ExtendedHandshakeClientVersion: "Transmission/2.92",
-		HTTPUserAgent:                  "Transmission/2.92",
-		Bep20:                          "-TR2920-",
-
-		ListenPort: freePort,
-	})
+	conf.ExtendedHandshakeClientVersion = "Transmission/2.92"
+	conf.HTTPUserAgent = "Transmission/2.92"
+	conf.Bep20 = "-TR2920-"
+	return torrent.NewClient(conf)
 }
 
 func getPort() int {
@@ -90,7 +79,7 @@ func Start(dir string) {
 		freePort := getPort()
 
 		log.Printf("Torrent client port: %d", freePort)
-
+		core.StorageRoot = dir
 		TClient, err := newTorrentClient(dir, freePort)
 		if err != nil {
 			log.Fatalf("error creating torrent client: %s", err)

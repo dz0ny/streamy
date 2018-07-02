@@ -24,7 +24,7 @@ public class ShowsAdapterPopcorn extends PopcornPaginationAdapter {
                 posts.add((PopcornShow) object);
             }
         }
-        addPosts(posts);
+        addResults(posts);
     }
 
     @Override

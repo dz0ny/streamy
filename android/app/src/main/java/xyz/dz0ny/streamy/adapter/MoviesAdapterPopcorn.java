@@ -24,7 +24,7 @@ public class MoviesAdapterPopcorn extends PopcornPaginationAdapter {
                 posts.add((PopcornMovie) object);
             }
         }
-        addPosts(posts);
+        addResults(posts);
     }
 
     @Override

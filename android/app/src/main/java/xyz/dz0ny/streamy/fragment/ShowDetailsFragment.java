@@ -15,7 +15,10 @@ import android.support.v17.leanback.widget.FullWidthDetailsOverviewSharedElement
 import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
+import android.support.v17.leanback.widget.Presenter;
+import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -33,8 +36,11 @@ import xyz.dz0ny.streamy.activity.ShowActivity;
 import xyz.dz0ny.streamy.presenter.EpisodePresenter;
 import xyz.dz0ny.streamy.presenter.ShowDescriptionPresenter;
 import xyz.dz0ny.streamy.remote.ApiCalls;
+import xyz.dz0ny.streamy.remote.popcorn.models.Episode;
 import xyz.dz0ny.streamy.remote.popcorn.models.PopcornShow;
 import xyz.dz0ny.streamy.remote.popcorn.models.ShowDetails;
+import xyz.dz0ny.streamy.remote.streamy.models.StreamyTorrent;
+import xyz.dz0ny.streamy.utils.VLC;
 
 public class ShowDetailsFragment extends DetailsFragment {
 
@@ -44,6 +50,7 @@ public class ShowDetailsFragment extends DetailsFragment {
     private ArrayObjectAdapter mAdapter;
     private DetailsFragmentBackgroundController mDetailsBackground;
 
+    @SuppressLint("CheckResult")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Timber.i("onCreate");
@@ -75,12 +82,42 @@ public class ShowDetailsFragment extends DetailsFragment {
             setAdapter(mAdapter);
 
             fetchShowDetails(show);
+            setOnItemViewClickedListener(this::getOnItemViewClickedListener);
 
         } else {
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
         }
     }
+
+    private void getOnItemViewClickedListener(
+            Presenter.ViewHolder itemViewHolder,
+            Object item,
+            RowPresenter.ViewHolder rowViewHolder,
+            Object row
+    ) {
+        Timber.d("setOnItemViewClickedListener: %s", item.getClass());
+        if (item instanceof Episode) {
+            Episode ep = (Episode) item;
+            Timber.d("Magnet: %s", ep.getMagnet());
+            ApiCalls.addTorrent(ep.getMagnet())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .unsubscribeOn(Schedulers.io())
+                    .subscribe(this::bindTorrentResult, Timber::e);
+        }
+    }
+
+    private void bindTorrentResult(StreamyTorrent streamyTorrent) {
+        String url = streamyTorrent.getPlayableFile();
+        if (url == null) {
+            Toast.makeText(getContext(), "Cannot play this torrent file!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        getContext().startActivity(VLC.Intent("Web", streamyTorrent.getUrl()));
+    }
+
 
     private void initializeBackground(ShowDetails data) {
         mDetailsBackground.enableParallax();
@@ -151,10 +188,14 @@ public class ShowDetailsFragment extends DetailsFragment {
 
         for (int i = 1; i <= response.getSeasons(); i++) {
             String season = String.format("Season %d", i);
-            ArrayObjectAdapter showsAdapter = new ArrayObjectAdapter(new EpisodePresenter());
+            EpisodePresenter p = new EpisodePresenter();
+            ArrayObjectAdapter showsAdapter = new ArrayObjectAdapter(p);
             showsAdapter.addAll(0, response.getEpisodes(i));
+
             mAdapter.add(new ListRow(new HeaderItem(i - 1, season), showsAdapter));
         }
 
     }
+
+
 }

@@ -9,6 +9,7 @@ public class PopcornShow implements Serializable {
     static final long serialVersionUID = 627566175075960653L;
 
     private String imdb_id;
+    private String tvdb_id;
     private String title;
     private String synopsis;
     private String trailer;

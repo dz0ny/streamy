@@ -15,7 +15,7 @@ public class PopcornAPI {
 
     private static PopcornService mDummyService;
 
-    public static synchronized PopcornService getPopcornService() {
+    public static synchronized PopcornService client() {
         if (mDummyService == null) {
             mDummyService = ApiClients
                     .getPopApiClient()
@@ -28,13 +28,14 @@ public class PopcornAPI {
     public interface PopcornService {
 
         @GET("movies/{page}")
-        Observable<List<PopcornMovie>> movies(@Path("page") String nextPage, @Query("sort") String sort);
+        Observable<List<PopcornMovie>> movies(@Path("page") String nextPage, @Query("sort") String sort, @Query("keywords") String q);
 
         @GET("shows/{page}")
-        Observable<List<PopcornShow>> shows(@Path("page") String nextPage, @Query("sort") String sort);
+        Observable<List<PopcornShow>> shows(@Path("page") String nextPage, @Query("sort") String sort, @Query("keywords") String q);
 
         @GET("show/{page}")
         Observable<ShowDetails> show(@Path("page") String id);
+
 
     }
 }

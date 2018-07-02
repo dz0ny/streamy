@@ -1,5 +1,8 @@
 package xyz.dz0ny.streamy.remote;
 
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
@@ -22,12 +25,19 @@ public class ApiClients {
         return popClient;
     }
 
-    static synchronized Retrofit getStrmClient() {
+    public static synchronized Retrofit getStrmClient() {
         if (strmClient == null) {
+            OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
+                    .connectTimeout(1, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
+                    .build();
             strmClient = new Retrofit
                     .Builder()
+                    .client(okHttpClient)
                     .baseUrl("http://localhost:9092/")
                     .addConverterFactory(MoshiConverterFactory.create())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .build();
         }
 

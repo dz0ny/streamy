@@ -6,8 +6,6 @@ import android.support.v17.leanback.widget.BaseCardView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 
-import xyz.dz0ny.streamy.remote.popcorn.models.Episode;
-
 
 public abstract class BindableCardView<T> extends BaseCardView {
 
@@ -33,7 +31,7 @@ public abstract class BindableCardView<T> extends BaseCardView {
         inflater.inflate(getLayoutResource(), this);
     }
 
-    protected abstract void bind(Episode data);
+    protected abstract void bind(Object data);
 
     protected abstract @LayoutRes
     int getLayoutResource();

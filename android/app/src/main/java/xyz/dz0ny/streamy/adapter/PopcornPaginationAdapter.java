@@ -89,11 +89,17 @@ public abstract class PopcornPaginationAdapter extends ArrayObjectAdapter {
     }
 
 
-    public void addPosts(List<?> posts) {
+    public void addResults(List<?> posts) {
         if (posts.size() > 0) {
             addAll(size(), posts);
         } else {
             mNextPage = 0;
+        }
+    }
+
+    public void removeAll() {
+        for (Object i : getItems()) {
+            remove(i);
         }
     }
 
