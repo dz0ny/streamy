@@ -14,9 +14,12 @@ import (
 	"github.com/anacrolix/missinggo/x"
 	"github.com/anacrolix/tagflag"
 	"github.com/anacrolix/torrent"
-
 	"github.com/anacrolix/torrent/storage"
+	"github.com/jackpal/gateway"
+	natpmp "github.com/jackpal/go-nat-pmp"
 )
+
+const oneMonth = 262974328
 
 var flags = struct {
 	Addr                  string        `help:"HTTP listen address"`
@@ -87,13 +90,29 @@ func main() {
 	freePort := getPort()
 
 	log.Printf("Torrent client port: %d", freePort)
+	gatewayIP, err := gateway.DiscoverGateway()
+	if err != nil {
+		return
+	}
 
+	client := natpmp.NewClient(gatewayIP)
+
+	if _, err = client.AddPortMapping("tcp", freePort, freePort, oneMonth); err != nil {
+		log.Fatalf("error creating natpmp mapping: %s", err)
+	}
+
+	if _, err = client.AddPortMapping("udp", freePort, freePort, oneMonth); err != nil {
+		log.Fatalf("error creating natpmp mapping: %s", err)
+	}
 	cl, err := newTorrentClient(freePort)
 	if err != nil {
 		log.Fatalf("error creating torrent client: %s", err)
 	}
 	defer cl.Close()
-
+	defer func() {
+		client.AddPortMapping("tcp", freePort, freePort, 0)
+		client.AddPortMapping("udp", freePort, freePort, 0)
+	}()
 	l, err := net.Listen("tcp4", flags.Addr)
 	if err != nil {
 		log.Fatal(err)

@@ -18,7 +18,23 @@ version_flags = -X $(PKG)/version.Version=$(VERSION) \
 
 .PHONY: $(TARGETS)
 $(TARGETS):
-	env GOOS=$(goos) GOARCH=$(goarch) go build --ldflags '-s -w $(version_flags)' -o $(output) $(PKG)/cmd/$(PKG)
+	cd streamy; env CGO_ENABLED=0 GOOS=$(goos) GOARCH=$(goarch) go build --gcflags "-trimpath $(shell pwd)" --ldflags '-s -w $(version_flags)' -o ../$(output) $(PKG)/cmd/$(PKG)
+
+define localbuild
+	GO111MODULE=off go get -u $(1)
+	GO111MODULE=off go build $(1)
+	mkdir -p bin
+	mv $(2) bin/$(2)
+endef
+
+define ghupload
+	bin/github-release upload \
+		--user dz0ny \
+		--repo $(PKG) \
+		--tag "v$(VERSION)" \
+		--name $(PKG)-$(1) \
+		--file $(PKG)-$(1)
+endef
 
 #
 # Build all defined targets
@@ -32,79 +48,47 @@ build: $(TARGETS)
 install: build
 	sudo mv $(CURRENT_TARGET) /usr/local/bin/$(PKG)
 
-#
-# Install locked dependecies
-#
-ensure: bin/dep
-	cd src/$(PKG); dep ensure
-
-#
-# Update all locked dependecies
-#
-update: bin/dep
-	cd src/$(PKG); dep ensure -update
-
-bin/dep:
-	go get -u github.com/golang/dep/cmd/dep
-
 bin/github-release:
-	go get github.com/aktau/github-release
+	$(call localbuild,github.com/aktau/github-release,github-release)
 
 bin/gocov:
-	go get -u github.com/axw/gocov/gocov
+	$(call localbuild,github.com/axw/gocov/gocov,gocov)
+
+bin/golangci-lint:
+	$(call localbuild,github.com/golangci/golangci-lint/cmd/golangci-lint,golangci-lint)
 
 bin/statik:
-	go get github.com/rakyll/statik
-
-bin/gometalinter:
-	go get -u github.com/alecthomas/gometalinter
-	bin/gometalinter --install --update
-
-deps:
-	go get -t $(PKG)/... # install test packages
+	$(call localbuild,github.com/rakyll/statik,statik)
 
 clean:
-	rm -f $(PKG)
-	rm -rf pkg
 	rm -rf bin
-	find src/* -maxdepth 0 ! -name '$(PKG)' -type d | xargs rm -rf
-	rm -rf src/$(PKG)/vendor/
-	 
-lint: bin/gometalinter
-	bin/gometalinter --fast --disable=gotype --disable=gosimple --disable=ineffassign --disable=dupl --disable=gas --cyclo-over=30 --deadline=60s --exclude $(shell pwd)/src/$(PKG)/vendor src/$(PKG)/...
-	find src/$(PKG) -not -path "./src/$(PKG)/vendor/*" -name '*.go' | xargs gofmt -w -s
 
-test: deps lint cover
-	go test -v -race $(shell go-ls $(PKG)/...)
+lint: bin/golangci-lint
+	bin/golangci-lint run
+	go fmt
+
+test: lint cover
+	go test -v -race ./...
 
 cover: bin/gocov
-	gocov test $(shell go-ls $(PKG)/...) | gocov report
-
-all: deps sync build test
+	gocov test ./... | gocov report
 
 ui: bin/statik
 	cd web; npm run build
-	rm -rf src/streamy/statik
-	mv web/statik src/streamy
-	
+	rm -rf streamy/statik
+	mv web/statik streamy
+
 package: build
 	mv -f $(PKG)-*-* service.streamy/bin/
 	zip -r service.$(PKG)-${VERSION}-${BUILD_TIME}.zip service.$(PKG)
 
-node_modules/.bin/api-console:
-	npm install api-console-cli
-	
-docs: node_modules/.bin/api-console
-	node_modules/.bin/api-console build api.raml
 tv:
 	gomobile bind -target=android/arm64 -ldflags '-s -w $(version_flags)' -o android/app/libs/tv.aar streamy/cmd/tv
-	
+
 release: package
-	github-release upload \
-		--user dz0ny \
-		--repo video.streamy \
-		--tag "v$(VERSION)" \
-		--name "service.$(PKG)-${VERSION}-${BUILD_TIME}.zip" \
-		--file "service.$(PKG)-${VERSION}-${BUILD_TIME}.zip"
+	$(call ghupload,Linux-armv7l)
+	$(call ghupload,Linux-armv6l)
+	$(call ghupload,Linux-aarch64)
+	$(call ghupload,Linux-x86_64)
 
 all: deps sync build test
