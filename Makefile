@@ -83,7 +83,12 @@ package: build
 	zip -r service.$(PKG)-${VERSION}-${BUILD_TIME}.zip service.$(PKG)
 
 tv:
-	gomobile bind -target=android/arm64 -ldflags '-s -w $(version_flags)' -o android/app/libs/tv.aar streamy/cmd/tv
+	cd streamy; env GO111MODULE=off go get -u golang.org/x/mobile/cmd/gobind
+	cd streamy; env GO111MODULE=off go get -u golang.org/x/mobile/cmd/gomobile
+	cd streamy; env GO111MODULE=off go get -u golang.org/x/sys/unix
+	cd streamy; env GO111MODULE=off gomobile init
+	cd streamy; env GO111MODULE=on go mod vendor
+	cd streamy; env GO111MODULE=off gomobile bind -target=android -v -ldflags '-s -w $(version_flags)' -o android/app/libs/tv.aar streamy/cmd/tv
 
 release: package
 	$(call ghupload,Linux-armv7l)
