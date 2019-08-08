@@ -3,10 +3,10 @@ module streamy
 go 1.12
 
 require (
-	github.com/anacrolix/envpprof v1.0.0 // indirect
-	github.com/anacrolix/missinggo v1.1.1
+	github.com/anacrolix/dht v1.0.1 // indirect
+	github.com/anacrolix/missinggo v1.2.1
 	github.com/anacrolix/tagflag v1.0.0
-	github.com/anacrolix/torrent v1.5.2
+	github.com/anacrolix/torrent v1.7.1
 	github.com/glycerine/go-unsnap-stream v0.0.0-20190730064659-98d31706395a // indirect
 	github.com/glycerine/goconvey v0.0.0-20190410193231-58a59202ab31 // indirect
 	github.com/go-chi/chi v4.0.2+incompatible
@@ -15,7 +15,6 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c // indirect
 	github.com/jackpal/gateway v1.0.5
 	github.com/jackpal/go-nat-pmp v1.0.1
-	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7 // indirect
 	github.com/rakyll/statik v0.1.6
 	github.com/smartystreets/assertions v1.0.1 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337 // indirect

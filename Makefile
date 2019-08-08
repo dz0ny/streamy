@@ -1,4 +1,4 @@
-VERSION := 0.0.9
+VERSION := 1.0.0
 PKG := streamy
 COMMIT := $(shell git rev-parse HEAD)
 BUILD_TIME := $(shell date -u +%FT%T)
@@ -88,7 +88,7 @@ tv:
 	cd streamy; env GO111MODULE=off go get -u golang.org/x/sys/unix
 	cd streamy; env GO111MODULE=off gomobile init
 	cd streamy; env GO111MODULE=on go mod vendor
-	cd streamy; env GO111MODULE=off gomobile bind -target=android -v -ldflags '-s -w $(version_flags)' -o android/app/libs/tv.aar streamy/cmd/tv
+	cd streamy; env GO111MODULE=off gomobile bind -target=android -v -ldflags '-s -w $(version_flags)' -o ../android/app/libs/tv.aar streamy/cmd/tv
 
 release: package
 	$(call ghupload,Linux-armv7l)

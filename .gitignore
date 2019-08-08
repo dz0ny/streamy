@@ -30,6 +30,7 @@ src/golang.org
 src/gopkg.in
 src/sourcegraph.com
 streamy-*-*
+streamy/vendor
 torrents
 filecache
 node_modules
