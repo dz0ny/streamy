@@ -33,6 +33,7 @@ var flags = struct {
 	Debug                 bool          `help:"Verbose output"`
 	ConnectionsPerTorrent int           `help:"Limit Connections per torrent"`
 	MountDir              string        `help:"location where torrent contents are made available"`
+	DisableUPNP           bool          `help:"Should we use UPNP to open ports"`
 }{
 	Addr:                  "0.0.0.0:9092",
 	CacheCapacity:         4000 << 20,
@@ -43,6 +44,7 @@ var flags = struct {
 	ConnectionsPerTorrent: 40,
 	Prefetch:              100 << 20,
 	MountDir:              "",
+	DisableUPNP:           false,
 }
 
 func newTorrentClient(freePort int) (ret *torrent.Client, err error) {
@@ -62,6 +64,7 @@ func newTorrentClient(freePort int) (ret *torrent.Client, err error) {
 	conf.ExtendedHandshakeClientVersion = "Transmission/2.92"
 	conf.HTTPUserAgent = "Transmission/2.92"
 	conf.Bep20 = "-TR2920-"
+	conf.NoDefaultPortForwarding = flags.DisableUPNP
 	return torrent.NewClient(conf)
 }
 
