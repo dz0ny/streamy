@@ -10,7 +10,8 @@ import (
 	"streamy/core"
 	"streamy/version"
 
-	"github.com/anacrolix/missinggo/filecache"
+	"github.com/anacrolix/missinggo/v2/filecache"
+	"github.com/anacrolix/missinggo/v2/resource"
 	"github.com/anacrolix/missinggo/x"
 	"github.com/anacrolix/tagflag"
 	"github.com/anacrolix/torrent"
@@ -47,16 +48,22 @@ var flags = struct {
 	DisableUPNP:           false,
 }
 
+func getStorageProvider() resource.Provider {
+	fc, err := filecache.NewCache(flags.FileDir)
+	x.Pie(err)
+	fc.SetCapacity(flags.CacheCapacity.Int64())
+	return fc.AsResourceProvider()
+}
+
+func getStorage() (_ storage.ClientImpl, onTorrentGrace func(torrent.InfoHash)) {
+	return storage.NewResourcePieces(getStorageProvider()), func(ih torrent.InfoHash) {}
+}
+
 func newTorrentClient(freePort int) (ret *torrent.Client, err error) {
 	core.StorageRoot = flags.FileDir
-	storage := func() storage.ClientImpl {
-		fc, err := filecache.NewCache(flags.FileDir)
-		x.Pie(err)
-		fc.SetCapacity(flags.CacheCapacity.Int64())
-		storageProvider := fc.AsResourceProvider()
-		return storage.NewResourcePieces(storageProvider)
-	}()
+
 	conf := torrent.NewDefaultClientConfig()
+	storage, _ := getStorage()
 	conf.DefaultStorage = storage
 	conf.ListenPort = freePort
 	conf.EstablishedConnsPerTorrent = flags.ConnectionsPerTorrent
