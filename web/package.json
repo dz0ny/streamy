@@ -10,7 +10,7 @@
     "build": "node build/build.js && statik -src=./dist"
   },
   "dependencies": {
-    "axios": "^0.17.1",
+    "axios": "^0.21.1",
     "bootstrap": "^4.0.0-beta.2",
     "node-sass": "^4.7.2",
     "pretty-bytes": "^4.0.2",
